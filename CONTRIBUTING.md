@@ -113,6 +113,25 @@ pnpm start
 
 For live reload while editing, use `npm run dev` (or `pnpm run dev`) instead — it runs `src/index.ts` directly via `tsx watch`, no build step needed.
 
+### Connecting a local MCP client to your source build
+
+However you started it (`npm start`, `pnpm start`, or `npm run dev`), the server listens on `http://localhost:3000/mcp` by default (override with `PORT`). Point an MCP client at that same URL to exercise your local changes end-to-end — this is exactly [README.md's Claude Code section](README.md#claude-code), just aimed at your working copy instead of a published release.
+
+For Claude Code, drop a project-scoped `.mcp.json` in the repo root:
+
+```json
+{
+  "mcpServers": {
+    "listmonk": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+`.mcp.json` isn't tracked by this repo (see `.gitignore`), so it's safe to leave in place while developing. Restart the running server (`npm run dev` already picks up code changes automatically) whenever you change tool schemas or registration logic — Claude Code reconnects on its next request, no client-side restart needed. See [Selecting which tools are available](README.md#selecting-which-tools-are-available) if you want `.mcp.json` to only expose a subset of tools while you're working on one category.
+
 ### Docker (local build)
 
 ```bash
