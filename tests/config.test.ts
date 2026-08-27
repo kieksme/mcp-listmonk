@@ -1,5 +1,27 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadConfig, parseEnabledToolsEnv } from "../src/config.js";
+import { loadConfig, parseEnabledToolsEnv, resolveTransport } from "../src/config.js";
+
+describe("resolveTransport", () => {
+  it("defaults to http when neither the flag nor the env var is set", () => {
+    expect(resolveTransport([], {})).toBe("http");
+  });
+
+  it("returns stdio when --stdio is passed on the command line", () => {
+    expect(resolveTransport(["node", "index.js", "--stdio"], {})).toBe("stdio");
+  });
+
+  it("returns stdio when MCP_TRANSPORT=stdio, case-insensitively", () => {
+    expect(resolveTransport([], { MCP_TRANSPORT: "Stdio" })).toBe("stdio");
+  });
+
+  it("ignores an unrecognized MCP_TRANSPORT value and falls back to http", () => {
+    expect(resolveTransport([], { MCP_TRANSPORT: "websocket" })).toBe("http");
+  });
+
+  it("the --stdio flag takes precedence over MCP_TRANSPORT=http", () => {
+    expect(resolveTransport(["--stdio"], { MCP_TRANSPORT: "http" })).toBe("stdio");
+  });
+});
 
 describe("parseEnabledToolsEnv", () => {
   it("returns an empty array for undefined input", () => {
@@ -70,7 +92,26 @@ describe("loadConfig", () => {
       port: 8080,
       enabledToolSelectors: ["subscribers", "lists"],
       serverAuthToken: "secret-token",
+      transport: "http",
     });
+  });
+
+  it("defaults transport to http", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(loadConfig().transport).toBe("http");
+  });
+
+  it("does not warn about MCP_SERVER_AUTH_TOKEN when running over stdio", () => {
+    process.argv.push("--stdio");
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    try {
+      const config = loadConfig();
+      expect(config.transport).toBe("stdio");
+      expect(warnSpy).not.toHaveBeenCalled();
+    } finally {
+      process.argv.pop();
+    }
   });
 
   it("defaults port to 3000 when PORT is not set", () => {
