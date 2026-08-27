@@ -1,6 +1,6 @@
 # @kieksme/listmonk-mcp
 
-![kieks.me Header](https://raw.githubusercontent.com/kieksme/kieks.me.cicd/main/assets/readme-header.svg)
+![Listmonk MCP](assets/readme-header.svg)
 
 A **Streamable HTTP** MCP (Model Context Protocol) server exposing the full [Listmonk](https://listmonk.app) REST API (72 tools across 14 categories) to MCP-compatible LLM clients.
 
