@@ -111,7 +111,7 @@ LISTMONK_API_TOKEN=xxxxxxxx \
 pnpm start
 ```
 
-For live reload while editing, use `npm run dev` (or `pnpm run dev`) instead — it runs `src/index.ts` directly via `tsx watch`, no build step needed.
+For live reload while editing, use `npm run dev` (or `pnpm run dev`) instead — it runs `src/index.ts` directly via `tsx watch`, no build step needed. Append `-- --stdio` to any of the commands above to run the stdio transport instead of the default HTTP one (see [README.md's Configuration section](README.md#configuration) for what each transport needs).
 
 ### Connecting a local MCP client to your source build
 
@@ -136,19 +136,28 @@ For Claude Code, drop a project-scoped `.mcp.json` in the repo root:
 
 ```bash
 docker build -t listmonk-mcp .
+
+# HTTP transport
 docker run -p 3000:3000 \
   -e LISTMONK_URL=https://newsletter.example.com \
   -e LISTMONK_API_USER=my-api-user \
   -e LISTMONK_API_TOKEN=xxxxxxxx \
   -e LISTMONK_ENABLED_TOOLS='["subscribers","campaigns"]' \
   listmonk-mcp
+
+# stdio transport
+docker run -i --rm \
+  -e LISTMONK_URL=https://newsletter.example.com \
+  -e LISTMONK_API_USER=my-api-user \
+  -e LISTMONK_API_TOKEN=xxxxxxxx \
+  listmonk-mcp --stdio
 ```
 
 ## Verifying your changes locally
 
 ```bash
 npm run list-tools   # prints the tool catalog and which tools LISTMONK_ENABLED_TOOLS would enable, no network access needed
-npx @modelcontextprotocol/inspector   # connect to http://localhost:3000/mcp via the Streamable HTTP transport
+npx @modelcontextprotocol/inspector   # connect to http://localhost:3000/mcp (HTTP), or "npx tsx src/index.ts --stdio" as the launch command for the stdio transport
 ```
 
 ## Testing

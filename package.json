@@ -1,7 +1,7 @@
 {
   "name": "@kieksme/listmonk-mcp",
   "version": "1.2.0",
-  "description": "Streamable HTTP MCP server for the Listmonk newsletter/mailing-list API",
+  "description": "MCP server for the Listmonk newsletter/mailing-list API — stdio for local clients, Streamable HTTP for remote deployments",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
