@@ -97,7 +97,11 @@ If you set `MCP_SERVER_AUTH_TOKEN` on the server, add the header: `claude mcp ad
 
 ### Cursor
 
-Local (stdio), via `.cursor/mcp.json` in your repo root (or globally in `~/.cursor/mcp.json`):
+One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in Cursor's MCP settings):
+
+[![Add listmonk MCP server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=listmonk&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBraWVrc21lL2xpc3Rtb25rLW1jcCIsIi0tc3RkaW8iXSwiZW52Ijp7IkxJU1RNT05LX1VSTCI6Imh0dHBzOi8vbmV3c2xldHRlci5leGFtcGxlLmNvbSIsIkxJU1RNT05LX0FQSV9VU0VSIjoibXktYXBpLXVzZXIiLCJMSVNUTU9OS19BUElfVE9LRU4iOiJ4eHh4eHh4eCJ9fQ%3D%3D)
+
+Or configure it manually — local (stdio), via `.cursor/mcp.json` in your repo root (or globally in `~/.cursor/mcp.json`):
 
 ```json
 {
