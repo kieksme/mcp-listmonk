@@ -39,6 +39,8 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "list-tools": "tsx scripts/list-tools.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },
   "engines": {
@@ -54,6 +56,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.7"
   }
 }
