@@ -204,6 +204,10 @@ ChatGPT's Connectors (Settings → Connectors → Create, available on paid plan
 - **Campaign preview/content tools** are intentionally split into four distinct tools because Listmonk exposes four distinct endpoints for them: `listmonk_get_campaign_preview` renders the campaign as currently saved; `listmonk_preview_campaign_draft` and `listmonk_preview_campaign_text` render an *unsaved* body without persisting anything; `listmonk_convert_campaign_content` performs and *persists* a format conversion (e.g. markdown → HTML) — it's not a preview despite the similar area.
 - **`listmonk_send_campaign_test`** fetches the campaign's current saved state first and only overrides the fields you explicitly pass, to avoid accidentally blanking out fields Listmonk's own API would otherwise silently overwrite with empty values.
 
+## Releases
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Every push to `main` is scanned for [Conventional Commits](https://www.conventionalcommits.org/); release-please keeps a release PR up to date with the resulting version bump and `CHANGELOG.md` entry, grouped by commit type (`feat`, `fix`, `perf`, `revert`, `docs`, `style`, `chore`, `refactor`, `test`, `build`, `ci` — see `release-please-config.json`). Merging that PR tags the release and publishes it, which triggers `.github/workflows/release.yml` to build and publish the package to npm.
+
 ## License
 
 MIT © kieksme GbR
