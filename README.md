@@ -1,4 +1,4 @@
-# listmonk-mcp-server
+# @kieksme/listmonk-mcp
 
 A **Streamable HTTP** MCP (Model Context Protocol) server exposing the full [Listmonk](https://listmonk.app) REST API (72 tools across 14 categories) to MCP-compatible LLM clients.
 
@@ -50,6 +50,17 @@ Leave it unset (or `[]`) to expose all 72 tools.
 
 ## Running
 
+### Via npx (no install)
+
+```bash
+LISTMONK_URL=https://newsletter.example.com \
+LISTMONK_API_USER=my-api-user \
+LISTMONK_API_TOKEN=xxxxxxxx \
+npx @kieksme/listmonk-mcp
+```
+
+### From source
+
 ```bash
 npm install
 npm run build
@@ -64,13 +75,13 @@ The MCP endpoint is `POST http://localhost:3000/mcp` (streamable HTTP, stateless
 ### Docker
 
 ```bash
-docker build -t listmonk-mcp-server .
+docker build -t listmonk-mcp .
 docker run -p 3000:3000 \
   -e LISTMONK_URL=https://newsletter.example.com \
   -e LISTMONK_API_USER=my-api-user \
   -e LISTMONK_API_TOKEN=xxxxxxxx \
   -e LISTMONK_ENABLED_TOOLS='["subscribers","campaigns"]' \
-  listmonk-mcp-server
+  listmonk-mcp
 ```
 
 ### Verifying locally
@@ -79,6 +90,69 @@ docker run -p 3000:3000 \
 npm run list-tools   # prints the tool catalog and which tools LISTMONK_ENABLED_TOOLS would enable, no network access needed
 npx @modelcontextprotocol/inspector   # connect to http://localhost:3000/mcp via the Streamable HTTP transport
 ```
+
+## Using with MCP clients
+
+Start the server first (any of the methods above), so `http://localhost:3000/mcp` is reachable. Then point a client at it.
+
+**Important:** a client only needs `http://localhost:3000` if it runs *on the same machine* as the server. Claude Code and OpenCode are local CLIs, so `localhost` works directly. Claude Desktop is a local app and can usually reach `localhost` too. **ChatGPT and Claude.ai (the web apps) run in the cloud and cannot reach your `localhost`** — to use this server with them you'd need to deploy it somewhere reachable from the internet (or tunnel it, e.g. with `ngrok http 3000`) and use that public URL instead.
+
+### Claude Code
+
+Project-scoped, via `.mcp.json` in your repo root:
+
+```json
+{
+  "mcpServers": {
+    "listmonk": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+Or add it directly from the CLI:
+
+```bash
+claude mcp add --transport http listmonk http://localhost:3000/mcp
+```
+
+If you set `MCP_SERVER_AUTH_TOKEN` on the server, add the header: `claude mcp add --transport http listmonk http://localhost:3000/mcp --header "Authorization: Bearer <token>"`.
+
+### Claude Desktop
+
+Settings → Connectors → Add custom connector, and paste `http://localhost:3000/mcp` as the URL. If your Claude Desktop version's config file supports remote servers directly, the equivalent `claude_desktop_config.json` entry is:
+
+```json
+{
+  "mcpServers": {
+    "listmonk": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
+### OpenCode
+
+In `opencode.json` (project or global config):
+
+```json
+{
+  "mcp": {
+    "listmonk": {
+      "type": "remote",
+      "url": "http://localhost:3000/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+### ChatGPT
+
+ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable** URL — not `localhost`. Deploy the server (see Docker instructions above) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
 
 ## Tool catalog (72 tools)
 
@@ -129,3 +203,7 @@ npx @modelcontextprotocol/inspector   # connect to http://localhost:3000/mcp via
 - **Bulk/query subscriber operations** (`listmonk_delete_subscribers_by_query`, `listmonk_blocklist_subscribers_by_query`, `listmonk_manage_subscriber_lists_by_query`) run against a Listmonk SQL filter expression and act on *every* matching subscriber with no preview step. Always call `listmonk_list_subscribers` with the same `query` first to check the match count.
 - **Campaign preview/content tools** are intentionally split into four distinct tools because Listmonk exposes four distinct endpoints for them: `listmonk_get_campaign_preview` renders the campaign as currently saved; `listmonk_preview_campaign_draft` and `listmonk_preview_campaign_text` render an *unsaved* body without persisting anything; `listmonk_convert_campaign_content` performs and *persists* a format conversion (e.g. markdown → HTML) — it's not a preview despite the similar area.
 - **`listmonk_send_campaign_test`** fetches the campaign's current saved state first and only overrides the fields you explicitly pass, to avoid accidentally blanking out fields Listmonk's own API would otherwise silently overwrite with empty values.
+
+## License
+
+MIT © kieksme GbR

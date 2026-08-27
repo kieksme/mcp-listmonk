@@ -1,15 +1,45 @@
 {
-  "name": "listmonk-mcp-server",
+  "name": "@kieksme/listmonk-mcp",
   "version": "1.0.0",
   "description": "Streamable HTTP MCP server for the Listmonk newsletter/mailing-list API",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "listmonk-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kieksme/mcp-listmonk.git"
+  },
+  "homepage": "https://github.com/kieksme/mcp-listmonk#readme",
+  "bugs": {
+    "url": "https://github.com/kieksme/mcp-listmonk/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "listmonk",
+    "newsletter",
+    "email",
+    "mailing-list"
+  ],
+  "author": "kieksme GbR",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "clean": "rm -rf dist",
-    "list-tools": "tsx scripts/list-tools.ts"
+    "list-tools": "tsx scripts/list-tools.ts",
+    "prepublishOnly": "npm run build"
   },
   "engines": {
     "node": ">=18"
