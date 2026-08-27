@@ -89,6 +89,19 @@ The MCP endpoint is `POST http://localhost:3000/mcp` (streamable HTTP, stateless
 
 ### Docker
 
+Pull the published image from the GitHub Container Registry:
+
+```bash
+docker run -p 3000:3000 \
+  -e LISTMONK_URL=https://newsletter.example.com \
+  -e LISTMONK_API_USER=my-api-user \
+  -e LISTMONK_API_TOKEN=xxxxxxxx \
+  -e LISTMONK_ENABLED_TOOLS='["subscribers","campaigns"]' \
+  ghcr.io/kieksme/mcp-listmonk:latest
+```
+
+Or build it locally:
+
 ```bash
 docker build -t listmonk-mcp .
 docker run -p 3000:3000 \
