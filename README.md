@@ -49,6 +49,9 @@ Each client below supports two setups — pick one:
 
 ### Claude Code
 
+<details>
+<summary>Show config</summary>
+
 Local (stdio), project-scoped via `.mcp.json` in your repo root:
 
 ```json
@@ -96,7 +99,12 @@ claude mcp add --transport http listmonk http://localhost:3000/mcp
 
 If you set `MCP_SERVER_AUTH_TOKEN` on the server, add the header: `claude mcp add --transport http listmonk http://localhost:3000/mcp --header "Authorization: Bearer <token>"`.
 
+</details>
+
 ### Cursor
+
+<details>
+<summary>Show config</summary>
 
 One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in Cursor's MCP settings):
 
@@ -149,7 +157,12 @@ If you set `MCP_SERVER_AUTH_TOKEN` on the server, pass it as a header:
 
 You can also add either setup via **Cursor Settings → MCP → Add new MCP server**.
 
+</details>
+
 ### VS Code
+
+<details>
+<summary>Show config</summary>
 
 One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in VS Code's MCP settings):
 
@@ -187,7 +200,12 @@ Remote (HTTP), once the server is running (`type` is required here, since there'
 }
 ```
 
+</details>
+
 ### Claude Desktop
+
+<details>
+<summary>Show config</summary>
 
 Local (stdio), in `claude_desktop_config.json`:
 
@@ -219,7 +237,12 @@ Remote (HTTP): Settings → Connectors → Add custom connector, and paste `http
 }
 ```
 
+</details>
+
 ### OpenCode
+
+<details>
+<summary>Show config</summary>
 
 Local (stdio), in `opencode.json` (project or global config):
 
@@ -270,7 +293,12 @@ Remote (HTTP), once the server is running:
 
 On the local (stdio) setup, set `LISTMONK_ENABLED_TOOLS` in `environment` instead — see [Selecting which tools are available](#selecting-which-tools-are-available) for the full selector syntax.
 
+</details>
+
 ### LM Studio
+
+<details>
+<summary>Show config</summary>
 
 One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in LM Studio's MCP settings):
 
@@ -306,9 +334,16 @@ Remote (HTTP), once the server is running:
 }
 ```
 
+</details>
+
 ### ChatGPT
 
+<details>
+<summary>Show config</summary>
+
 ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable HTTP URL** — ChatGPT runs in the cloud and can't spawn a local stdio process, so the remote setup is the only option. Deploy the server (see [Docker](#docker)) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
+
+</details>
 
 ## Features
 
@@ -412,6 +447,9 @@ Since the query string is just part of the URL, this is the easiest way to give 
 
 ## Tool catalog (72 tools)
 
+<details>
+<summary>Show all 72 tools by category</summary>
+
 ### subscribers (17)
 `listmonk_list_subscribers`, `listmonk_create_subscriber`, `listmonk_get_subscriber`, `listmonk_update_subscriber`, `listmonk_delete_subscriber`, `listmonk_delete_subscribers_by_ids`, `listmonk_manage_subscriber_lists_bulk`, `listmonk_manage_subscriber_list_membership`, `listmonk_blocklist_subscribers_bulk`, `listmonk_blocklist_subscriber`, `listmonk_export_subscriber`, `listmonk_get_subscriber_bounces`, `listmonk_delete_subscriber_bounces`, `listmonk_send_subscriber_optin`, `listmonk_delete_subscribers_by_query`, `listmonk_blocklist_subscribers_by_query`, `listmonk_manage_subscriber_lists_by_query`
 
@@ -453,6 +491,8 @@ Since the query string is just part of the URL, this is the easiest way to give 
 
 ### miscellaneous (5)
 `listmonk_get_health`, `listmonk_get_server_config`, `listmonk_get_i18n_lang`, `listmonk_get_dashboard_charts`, `listmonk_get_dashboard_counts`
+
+</details>
 
 ## Notes on a few non-obvious tools
 
