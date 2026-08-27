@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.1](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.1.0...listmonk-mcp-v1.1.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ci:** fail docker-publish loudly on an unresolved version ([ce8baeb](https://github.com/kieksme/mcp-listmonk/commit/ce8baebe522835e3f3c3646712fd66294da3e944))
+* **ci:** fail docker-publish loudly on an unresolved version ([7531e8f](https://github.com/kieksme/mcp-listmonk/commit/7531e8fc90c981796e98fb1cbfeec6ca79fa24b6))
+
 ## [1.1.0](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.0.0...listmonk-mcp-v1.1.0) (2026-08-27)
 
 
