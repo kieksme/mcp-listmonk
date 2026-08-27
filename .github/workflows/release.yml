@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
       id-token: write
     steps:
       - name: Checkout
@@ -35,3 +36,19 @@ jobs:
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # GitHub Packages requires the scope to match the repo owner ("kieksme"),
+      # which @kieksme/listmonk-mcp already satisfies. Re-pointing setup-node
+      # at this registry only rewrites ~/.npmrc's auth/scope mapping — the
+      # already-built dist/ from the steps above is reused, no rebuild needed.
+      - name: Setup Node.js for GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@kieksme"
+
+      - name: Publish to GitHub Packages
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
