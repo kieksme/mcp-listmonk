@@ -11,7 +11,7 @@ Built against the [Listmonk OpenAPI spec](https://listmonk.app/docs/swagger/coll
 
 ## Quickstart
 
-**Local:** let your MCP client spawn the server itself over stdio — nothing to run by hand, no port to open. Add it to your client's config (Claude Code shown here; see [Connecting your MCP client](#connecting-your-mcp-client) below for Cursor, Claude Desktop, OpenCode, and ChatGPT):
+**Local:** let your MCP client spawn the server itself over stdio — nothing to run by hand, no port to open. Add it to your client's config (Claude Code shown here; see [Connecting your MCP client](#connecting-your-mcp-client) below for Cursor, VS Code, Claude Desktop, OpenCode, LM Studio, and ChatGPT):
 
 ```bash
 claude mcp add listmonk \
@@ -45,7 +45,7 @@ Each client below supports two setups — pick one:
 
 **Using pnpm instead of npx for the local/stdio setup:** every local (stdio) example below uses `command: "npx"` with `args: ["-y", "@kieksme/listmonk-mcp", "--stdio"]`. If you prefer pnpm, swap in `command: "pnpm"` with `args: ["dlx", "@kieksme/listmonk-mcp", "--stdio"]` — **and drop the `-y`**. `-y` is npx's "skip the install confirmation prompt" flag; `pnpm dlx` has no such prompt to begin with, so it doesn't accept `-y` at all and exits immediately with `ERROR Unknown option: 'y'` (surfacing to the client as a generic "Connection closed", since the process dies before it ever speaks MCP). The same swap applies to any CLI form below that starts with `npx -y` — replace it with `pnpm dlx` (no `-y`).
 
-**Reachability note for the remote/HTTP setup:** a client only needs `http://localhost:3000` if it runs *on the same machine* as the server. Claude Code, Cursor, and OpenCode are local tools, so `localhost` works directly. Claude Desktop is a local app and can usually reach `localhost` too. **ChatGPT and Claude.ai (the web apps) run in the cloud and cannot reach your `localhost`** — to use this server with them you'd need to deploy it somewhere reachable from the internet (or tunnel it, e.g. with `ngrok http 3000`) and use that public URL instead. ChatGPT's connectors are HTTP-only, so it has no local/stdio option below.
+**Reachability note for the remote/HTTP setup:** a client only needs `http://localhost:3000` if it runs *on the same machine* as the server. Claude Code, Cursor, VS Code, OpenCode, and LM Studio are all local tools, so `localhost` works directly. Claude Desktop is a local app and can usually reach `localhost` too. **ChatGPT and Claude.ai (the web apps) run in the cloud and cannot reach your `localhost`** — to use this server with them you'd need to deploy it somewhere reachable from the internet (or tunnel it, e.g. with `ngrok http 3000`) and use that public URL instead. ChatGPT's connectors are HTTP-only, so it has no local/stdio option below.
 
 ### Claude Code
 
@@ -149,6 +149,44 @@ If you set `MCP_SERVER_AUTH_TOKEN` on the server, pass it as a header:
 
 You can also add either setup via **Cursor Settings → MCP → Add new MCP server**.
 
+### VS Code
+
+One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in VS Code's MCP settings):
+
+[![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=listmonk&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40kieksme%2Flistmonk-mcp%22%2C%22--stdio%22%5D%2C%22env%22%3A%7B%22LISTMONK_URL%22%3A%22https%3A%2F%2Fnewsletter.example.com%22%2C%22LISTMONK_API_USER%22%3A%22my-api-user%22%2C%22LISTMONK_API_TOKEN%22%3A%22xxxxxxxx%22%7D%7D)
+[![Install in VS Code Insiders](https://img.shields.io/badge/Install_in-VS_Code_Insiders-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=listmonk&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40kieksme%2Flistmonk-mcp%22%2C%22--stdio%22%5D%2C%22env%22%3A%7B%22LISTMONK_URL%22%3A%22https%3A%2F%2Fnewsletter.example.com%22%2C%22LISTMONK_API_USER%22%3A%22my-api-user%22%2C%22LISTMONK_API_TOKEN%22%3A%22xxxxxxxx%22%7D%7D&quality=insiders)
+
+Or configure it manually — local (stdio), via `.vscode/mcp.json` in your repo root:
+
+```json
+{
+  "servers": {
+    "listmonk": {
+      "command": "npx",
+      "args": ["-y", "@kieksme/listmonk-mcp", "--stdio"],
+      "env": {
+        "LISTMONK_URL": "https://newsletter.example.com",
+        "LISTMONK_API_USER": "my-api-user",
+        "LISTMONK_API_TOKEN": "xxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+Remote (HTTP), once the server is running (`type` is required here, since there's no `command` to infer it from):
+
+```json
+{
+  "servers": {
+    "listmonk": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
+
 ### Claude Desktop
 
 Local (stdio), in `claude_desktop_config.json`:
@@ -231,6 +269,42 @@ Remote (HTTP), once the server is running:
 ```
 
 On the local (stdio) setup, set `LISTMONK_ENABLED_TOOLS` in `environment` instead — see [Selecting which tools are available](#selecting-which-tools-are-available) for the full selector syntax.
+
+### LM Studio
+
+One-click install (local/stdio, with placeholder credentials you'll need to fill in afterwards in LM Studio's MCP settings):
+
+[![Add MCP Server listmonk to LM Studio](https://files.lmstudio.ai/deeplink/mcp-install-light.svg)](https://lmstudio.ai/install-mcp?name=listmonk&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBraWVrc21lL2xpc3Rtb25rLW1jcCIsIi0tc3RkaW8iXSwiZW52Ijp7IkxJU1RNT05LX1VSTCI6Imh0dHBzOi8vbmV3c2xldHRlci5leGFtcGxlLmNvbSIsIkxJU1RNT05LX0FQSV9VU0VSIjoibXktYXBpLXVzZXIiLCJMSVNUTU9OS19BUElfVE9LRU4iOiJ4eHh4eHh4eCJ9fQ==)
+
+Or configure it manually, via `~/.lmstudio/mcp.json` (Program tab → Install → Edit mcp.json) — local (stdio):
+
+```json
+{
+  "mcpServers": {
+    "listmonk": {
+      "command": "npx",
+      "args": ["-y", "@kieksme/listmonk-mcp", "--stdio"],
+      "env": {
+        "LISTMONK_URL": "https://newsletter.example.com",
+        "LISTMONK_API_USER": "my-api-user",
+        "LISTMONK_API_TOKEN": "xxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+Remote (HTTP), once the server is running:
+
+```json
+{
+  "mcpServers": {
+    "listmonk": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
 
 ### ChatGPT
 
