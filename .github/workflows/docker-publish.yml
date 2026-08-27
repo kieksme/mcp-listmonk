@@ -3,7 +3,18 @@ name: Docker
 on:
   release:
     types: [published]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag the image with (e.g. 1.1.0). Defaults to the release/tag ref."
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to tag the image with (e.g. 1.1.0)"
+        required: false
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -18,6 +29,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            # Fallback for a manually created GitHub release / dispatch without
+            # an explicit version: strip any component prefix release-please
+            # adds (e.g. "listmonk-mcp-v1.1.0") down to the bare "1.1.0".
+            VERSION="${GITHUB_REF_NAME##*v}"
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major_minor=$(echo "$VERSION" | cut -d. -f1,2)" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -38,9 +62,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ steps.version.outputs.value }}
+            type=raw,value=${{ steps.version.outputs.major_minor }}
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v6
