@@ -3,6 +3,7 @@
 ![Listmonk MCP](assets/readme-header.svg)
 
 [![MCP Trust Score](https://mcptrustchecker.com/scan/npm/%40kieksme%2Flistmonk-mcp/badge.svg)](https://mcptrustchecker.com/scan/npm/%40kieksme%2Flistmonk-mcp)
+[![MCPSafe](https://api.mcpsafe.io/api/badge/pubfast5b021ffd554ff1df6833)](https://mcpsafe.io/scan/pubfast5b021ffd554ff1df6833)
 
 An MCP (Model Context Protocol) server exposing the full [Listmonk](https://listmonk.app) REST API (72 tools across 14 categories) to MCP-compatible LLM clients — as a **local stdio** process your client spawns itself, or as a **remote Streamable HTTP** deployment any number of clients can connect to.
 
