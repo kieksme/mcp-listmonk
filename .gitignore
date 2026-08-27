@@ -3,3 +3,5 @@ dist/
 *.log
 .env
 .pnpm-store/
+docker-compose.listmonk.yml
+config.toml

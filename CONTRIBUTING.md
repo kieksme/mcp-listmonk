@@ -10,6 +10,85 @@ cd mcp-listmonk
 npm install   # or: pnpm install
 ```
 
+### Running a local Listmonk instance
+
+You don't need a hosted Listmonk to develop against — Listmonk ships an official Docker image and only needs a Postgres database next to it. This gives you a disposable `LISTMONK_URL=http://localhost:9000` to point the MCP server at.
+
+Create `docker-compose.listmonk.yml` (git-ignored, local only) and `config.toml` next to it:
+
+```yaml
+# docker-compose.listmonk.yml
+services:
+  listmonk:
+    image: listmonk/listmonk:latest
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - TZ=Etc/UTC
+    volumes:
+      - ./config.toml:/listmonk/config.toml
+    command: [sh, -c, "./listmonk --install --idempotent --yes --config config.toml && ./listmonk --upgrade --yes --config config.toml && ./listmonk --config config.toml"]
+  db:
+    image: postgres:17-alpine
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=listmonk
+      - POSTGRES_PASSWORD=listmonk
+      - POSTGRES_DB=listmonk
+    volumes:
+      - listmonk-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U listmonk"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  listmonk-data:
+```
+
+```toml
+# config.toml
+[app]
+address = "0.0.0.0:9000"
+
+[db]
+host = "db"
+port = 5432
+user = "listmonk"
+password = "listmonk"
+database = "listmonk"
+ssl_mode = "disable"
+max_open = 25
+max_idle = 25
+max_lifetime = "300s"
+```
+
+Start it:
+
+```bash
+docker compose -f docker-compose.listmonk.yml up -d
+```
+
+The `--install` step provisions the schema on first run; subsequent starts skip straight to `--upgrade` (a no-op once you're current) and then the server. Listmonk is now reachable at `http://localhost:9000` — log in with the superadmin credentials you set during the one-time setup wizard at `http://localhost:9000/admin` (or, on `--install --idempotent`, whatever credentials you already configured).
+
+Then create an API user scoped to what you're testing (Admin → Users → New → API user) and grab its token — least-privilege, per the [security note in README.md](README.md#configuration): don't hand a locally-scoped test user broader access than the tools you're actually exercising. Use those to run the MCP server, per [Running from source](#running-from-source) below:
+
+```bash
+LISTMONK_URL=http://localhost:9000 \
+LISTMONK_API_USER=my-api-user \
+LISTMONK_API_TOKEN=xxxxxxxx \
+npm run dev
+```
+
+Tear down with `docker compose -f docker-compose.listmonk.yml down` (add `-v` to also drop the Postgres volume and start from a clean schema next time).
+
 ### Running from source
 
 npm:
