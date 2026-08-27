@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.3.0](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.2.0...listmonk-mcp-v1.3.0) (2026-08-27)
+
+
+### Features
+
+* add stdio transport for local MCP clients ([87c747a](https://github.com/kieksme/mcp-listmonk/commit/87c747a0ae6e52b6287bbaf5d999a26dfd520e63))
+* add stdio transport for local MCP clients ([072eca6](https://github.com/kieksme/mcp-listmonk/commit/072eca6194d29d0c3a2f578fa471fff9b45f4214))
+
+
+### Documentation
+
+* clarify client `enabled` flag vs. per-client tool selection ([6172d6e](https://github.com/kieksme/mcp-listmonk/commit/6172d6ebaec41bb7843c1d7e56dba43166164462))
+* clarify client `enabled` flag vs. per-client tool selection ([a96c119](https://github.com/kieksme/mcp-listmonk/commit/a96c1191c89bb34e43028884315a1f7b9875bf4c))
+* document connecting a local MCP client to a source build ([e277120](https://github.com/kieksme/mcp-listmonk/commit/e2771205e1812bf8b969854cf1f163618ac899d8))
+* document running a local Listmonk instance for development ([9b54d0e](https://github.com/kieksme/mcp-listmonk/commit/9b54d0ed1c351d43cff0645798809e059b9830cf))
+* document running a local Listmonk instance for development ([0bd67de](https://github.com/kieksme/mcp-listmonk/commit/0bd67de46c4928d90878e0cc06dc7eafb5bbbd1f))
+* restructure README for MCP users, move dev docs to CONTRIBUTING.md ([#14](https://github.com/kieksme/mcp-listmonk/issues/14)) ([2b6cf3a](https://github.com/kieksme/mcp-listmonk/commit/2b6cf3ad4e48a54bd52ab4e31c0073ab4e90714e))
+
 ## [1.2.0](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.1.1...listmonk-mcp-v1.2.0) (2026-08-27)
 
 
