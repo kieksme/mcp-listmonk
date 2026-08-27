@@ -117,6 +117,22 @@ In `opencode.json` (project or global config):
 }
 ```
 
+**Note on `enabled`:** this flag is OpenCode's own client-side switch — it just turns the whole server connection on/off for that client and has nothing to do with which listmonk tools/categories are exposed. To limit *which* tools this particular client sees (without restarting the server or touching `LISTMONK_ENABLED_TOOLS`), append the `tools` query parameter to the `url` itself:
+
+```json
+{
+  "mcp": {
+    "listmonk": {
+      "type": "remote",
+      "url": "http://localhost:3000/mcp?tools=subscribers,campaigns",
+      "enabled": true
+    }
+  }
+}
+```
+
+See [Selecting which tools are available](#selecting-which-tools-are-available) for the full selector syntax and the header-based alternative.
+
 ### ChatGPT
 
 ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable** URL — not `localhost`. Deploy the server (see [Docker](#docker)) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
@@ -192,6 +208,8 @@ LISTMONK_ENABLED_TOOLS=subscribers,campaigns
 Leave it unset (or `[]`) to expose all 72 tools.
 
 **Per-request override:** a single deployed instance can also serve different tool sets to different clients without a restart, via header `X-Listmonk-Enabled-Tools` or query string `?tools=` on the `POST /mcp` request — same selector syntax as above. This overrides `LISTMONK_ENABLED_TOOLS` for that one request only.
+
+Since the query string is just part of the URL, this is the easiest way to give one particular client (e.g. one entry in an `opencode.json`, `.mcp.json`, or `.cursor/mcp.json`) a reduced tool set while other clients keep hitting the same server with the full (or a different) set — just set that client's `url` to `http://localhost:3000/mcp?tools=subscribers,campaigns` instead of adding server-wide env vars or standing up a second instance. Clients that support custom headers can use `X-Listmonk-Enabled-Tools` instead, which keeps the URL itself clean.
 
 ## Tool catalog (72 tools)
 
