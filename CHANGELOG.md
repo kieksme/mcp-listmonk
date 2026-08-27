@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.0](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.1.1...listmonk-mcp-v1.2.0) (2026-08-27)
+
+
+### Features
+
+* **ci:** also publish npm package to GitHub Packages ([ac097b3](https://github.com/kieksme/mcp-listmonk/commit/ac097b39b58e000ac8f35646c2b7493bcf2a305f))
+* **ci:** also publish npm package to GitHub Packages ([684756b](https://github.com/kieksme/mcp-listmonk/commit/684756b549c82c30ff11daeed562190fc02985d0))
+
 ## [1.1.1](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.1.0...listmonk-mcp-v1.1.1) (2026-08-27)
 
 
