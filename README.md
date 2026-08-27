@@ -50,16 +50,20 @@ Leave it unset (or `[]`) to expose all 72 tools.
 
 ## Running
 
-### Via npx (no install)
+### Via npx / pnpm dlx (no install)
 
 ```bash
 LISTMONK_URL=https://newsletter.example.com \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
 npx @kieksme/listmonk-mcp
+# or
+pnpm dlx @kieksme/listmonk-mcp
 ```
 
 ### From source
+
+npm:
 
 ```bash
 npm install
@@ -68,6 +72,17 @@ LISTMONK_URL=https://newsletter.example.com \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
 npm start
+```
+
+pnpm:
+
+```bash
+pnpm install
+pnpm run build
+LISTMONK_URL=https://newsletter.example.com \
+LISTMONK_API_USER=my-api-user \
+LISTMONK_API_TOKEN=xxxxxxxx \
+pnpm start
 ```
 
 The MCP endpoint is `POST http://localhost:3000/mcp` (streamable HTTP, stateless — no session negotiation needed).
