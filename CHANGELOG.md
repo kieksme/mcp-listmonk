@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.3.1](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.3.0...listmonk-mcp-v1.3.1) (2026-08-28)
+
+
+### Documentation
+
+* add AgentAvow badge to README ([4dc75a4](https://github.com/kieksme/mcp-listmonk/commit/4dc75a40da4da3435e06542e258d03334e35b3dc))
+* add AgentAvow badge to README ([de29dd7](https://github.com/kieksme/mcp-listmonk/commit/de29dd79049b92e893a3784c1ed6dbcc28d0fa1d))
+* add MCPSafe badge to README ([65fc360](https://github.com/kieksme/mcp-listmonk/commit/65fc360520226510f00d3bc71c65bdf92b9f174d))
+* add one-click Cursor install button ([cf04aca](https://github.com/kieksme/mcp-listmonk/commit/cf04aca0ff8850e6efbe983b61ea9adac445367b))
+* add one-click Cursor install button ([07fb6bc](https://github.com/kieksme/mcp-listmonk/commit/07fb6bccb97e8075106afe5095503c21d2e1b115))
+* add VS Code and LM Studio one-click install buttons ([10d432d](https://github.com/kieksme/mcp-listmonk/commit/10d432d933834fe073630e413d28c2fcf4817abe))
+* add VS Code and LM Studio one-click install buttons ([19fda7c](https://github.com/kieksme/mcp-listmonk/commit/19fda7c416cae52477c200caf7a8feea00922cdb))
+* clarify pnpm dlx has no -y flag for the stdio setup ([2f44ee5](https://github.com/kieksme/mcp-listmonk/commit/2f44ee5622a6459613616de9e261fca1fc1be9bb))
+* clarify pnpm dlx has no -y flag for the stdio setup ([8061539](https://github.com/kieksme/mcp-listmonk/commit/806153935baf55c945c5f7f88e676007c0ed96d1))
+* collapse per-client configs and tool catalog into &lt;details&gt; ([7ad3824](https://github.com/kieksme/mcp-listmonk/commit/7ad38243e31e81e8ef8f11e33b76cc071fa5a483))
+* collapse per-client configs and tool catalog into &lt;details&gt; ([3d4bd66](https://github.com/kieksme/mcp-listmonk/commit/3d4bd66a00e6865b2213a48f14cea171e66daa00))
+* replace SkillAudit badge with MCP Trust Score badge ([d20f1c8](https://github.com/kieksme/mcp-listmonk/commit/d20f1c85fd5e7deb539f20e150849b0b29ed34db))
+* replace SkillAudit badge with MCP Trust Score badge ([4a6e26a](https://github.com/kieksme/mcp-listmonk/commit/4a6e26a6e699389360dd06befca31b8a120f2aef))
+
 ## [1.3.0](https://github.com/kieksme/mcp-listmonk/compare/listmonk-mcp-v1.2.0...listmonk-mcp-v1.3.0) (2026-08-27)
 
 
