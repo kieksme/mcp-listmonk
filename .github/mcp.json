@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "listmonk": {
+      "type": "http",
+      "url": "${COPILOT_MCP_LISTMONK_URL}",
+      "headers": {
+        "Authorization": "Bearer ${COPILOT_MCP_LISTMONK_TOKEN}"
+      },
+      "tools": ["*"]
+    }
+  }
+}

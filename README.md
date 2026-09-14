@@ -15,7 +15,7 @@ Built against the [Listmonk OpenAPI spec](https://listmonk.app/docs/swagger/coll
 
 ## Quickstart
 
-**Local:** let your MCP client spawn the server itself over stdio — nothing to run by hand, no port to open. Add it to your client's config (Claude Code shown here; see [Connecting your MCP client](#connecting-your-mcp-client) below for Cursor, VS Code, Claude Desktop, OpenCode, LM Studio, and ChatGPT):
+**Local:** let your MCP client spawn the server itself over stdio — nothing to run by hand, no port to open. Add it to your client's config (Claude Code shown here; see [Connecting your MCP client](#connecting-your-mcp-client) below for Cursor, VS Code, Claude Desktop, OpenCode, LM Studio, ChatGPT, Codex, and GitHub Copilot):
 
 ```bash
 claude mcp add listmonk \
@@ -55,6 +55,13 @@ Each client below supports two setups — pick one:
 
 <details>
 <summary>Show config</summary>
+
+The repository also ships a Claude Code plugin marketplace entry:
+
+```text
+/plugin marketplace add kieksme/mcp-listmonk
+/plugin install listmonk-mcp@mcp-listmonk
+```
 
 Local (stdio), project-scoped via `.mcp.json` in your repo root:
 
@@ -346,6 +353,32 @@ Remote (HTTP), once the server is running:
 <summary>Show config</summary>
 
 ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable HTTP URL** — ChatGPT runs in the cloud and can't spawn a local stdio process, so the remote setup is the only option. Deploy the server (see [Docker](#docker)) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
+
+</details>
+
+### Codex
+
+<details>
+<summary>Show config</summary>
+
+Register a remote (HTTP) endpoint in Codex (use a publicly reachable URL if Codex cannot reach your machine):
+
+```bash
+codex mcp add listmonk --url https://<your-host>/mcp \
+  --bearer-token-env-var LISTMONK_MCP_AUTH_TOKEN
+```
+
+The repository also includes `.codex-plugin/plugin.json` and `.mcp.json` for plugin-based installation.
+
+</details>
+
+### GitHub Copilot
+
+<details>
+<summary>Show config</summary>
+
+- VS Code: use the committed `.vscode/mcp.json` and enter the local or hosted `/mcp` URL when prompted.
+- Copilot Cloud Agent: use `.github/mcp.json` and configure `COPILOT_MCP_LISTMONK_URL` plus `COPILOT_MCP_LISTMONK_TOKEN` in the Copilot environment.
 
 </details>
 

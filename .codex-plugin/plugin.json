@@ -1,0 +1,19 @@
+{
+  "name": "listmonk-mcp",
+  "version": "1.0.0",
+  "description": "Manage Listmonk subscribers, campaigns, lists, templates, and administration via MCP.",
+  "author": { "name": "kieksme", "url": "https://github.com/kieksme" },
+  "homepage": "https://github.com/kieksme/mcp-listmonk#readme",
+  "repository": "https://github.com/kieksme/mcp-listmonk",
+  "license": "MIT",
+  "keywords": ["mcp", "listmonk", "newsletter", "email", "mailing-list"],
+  "mcpServers": "./mcp.json",
+  "interface": {
+    "displayName": "Listmonk MCP",
+    "shortDescription": "Manage Listmonk newsletters",
+    "longDescription": "Manage Listmonk subscribers, campaigns, lists, templates, media, settings, and administration through MCP.",
+    "developerName": "kieksme",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"]
+  }
+}
