@@ -4,6 +4,7 @@
 
 [![MCP Trust Score](https://mcptrustchecker.com/scan/npm/%40kieksme%2Flistmonk-mcp/badge.svg)](https://mcptrustchecker.com/scan/npm/%40kieksme%2Flistmonk-mcp)
 [![MCPSafe](https://api.mcpsafe.io/api/badge/pubfast5b021ffd554ff1df6833)](https://mcpsafe.io/scan/pubfast5b021ffd554ff1df6833)
+
 [![AgentAvow scores](https://agentavow.com/api/v1/public/scan/kieksme/mcp-listmonk/card.svg)](https://agentavow.com/check/kieksme/mcp-listmonk)
 
 [![Add listmonk MCP server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=listmonk&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBraWVrc21lL2xpc3Rtb25rLW1jcCIsIi0tc3RkaW8iXSwiZW52Ijp7IkxJU1RNT05LX1VSTCI6Imh0dHBzOi8vbmV3c2xldHRlci5leGFtcGxlLmNvbSIsIkxJU1RNT05LX0FQSV9VU0VSIjoibXktYXBpLXVzZXIiLCJMSVNUTU9OS19BUElfVE9LRU4iOiJ4eHh4eHh4eCJ9fQ%3D%3D)
