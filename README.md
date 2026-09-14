@@ -1,5 +1,8 @@
 # @kieksme/listmonk-mcp
 
+[![AgentAvow](https://agentavow.com/api/v1/public/scan/kieksme/mcp-listmonk/badge)](https://agentavow.com/check/kieksme/mcp-listmonk)
+[![MCP Trust Score](https://mcptrustchecker.com/scan/github/kieksme/mcp-listmonk/badge.svg)](https://mcptrustchecker.com/scan/github/kieksme/mcp-listmonk)
+
 A **Streamable HTTP** MCP (Model Context Protocol) server exposing the full [Listmonk](https://listmonk.app) REST API (72 tools across 14 categories) to MCP-compatible LLM clients.
 
 Built against the [Listmonk OpenAPI spec](https://listmonk.app/docs/swagger/collections.yaml).
