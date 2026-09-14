@@ -1,3 +1,5 @@
+export type McpTransport = "stdio" | "http";
+
 export interface AppConfig {
   listmonkUrl: string;
   listmonkApiUser: string;
@@ -5,6 +7,7 @@ export interface AppConfig {
   port: number;
   enabledToolSelectors: string[];
   serverAuthToken: string | undefined;
+  transport: McpTransport;
 }
 
 function requireEnv(name: string): string {
@@ -40,6 +43,16 @@ export function parseEnabledToolsEnv(raw: string | undefined): string[] {
     .filter((s) => s.length > 0);
 }
 
+/**
+ * Resolves which transport to run: `--stdio` on the command line takes
+ * precedence, then MCP_TRANSPORT=stdio; anything else (including unset)
+ * means the default Streamable HTTP transport.
+ */
+export function resolveTransport(argv: string[], env: NodeJS.ProcessEnv): McpTransport {
+  if (argv.includes("--stdio")) return "stdio";
+  return env.MCP_TRANSPORT?.trim().toLowerCase() === "stdio" ? "stdio" : "http";
+}
+
 export function loadConfig(): AppConfig {
   const listmonkUrl = requireEnv("LISTMONK_URL");
   const listmonkApiUser = requireEnv("LISTMONK_API_USER");
@@ -47,8 +60,12 @@ export function loadConfig(): AppConfig {
   const port = Number.parseInt(process.env.PORT ?? "3000", 10);
   const enabledToolSelectors = parseEnabledToolsEnv(process.env.LISTMONK_ENABLED_TOOLS);
   const serverAuthToken = process.env.MCP_SERVER_AUTH_TOKEN || undefined;
+  const transport = resolveTransport(process.argv, process.env);
 
-  if (!serverAuthToken) {
+  // The auth-token gate only protects the HTTP transport's /mcp endpoint. In
+  // stdio mode there's no network listener — the client spawns and owns the
+  // process directly — so the warning would be noise (and misleading).
+  if (transport === "http" && !serverAuthToken) {
     console.warn(
       "WARNING: MCP_SERVER_AUTH_TOKEN is not set. The /mcp endpoint is unauthenticated at the " +
         "application layer — anyone who can reach this port gets full Listmonk access in the " +
@@ -57,5 +74,5 @@ export function loadConfig(): AppConfig {
     );
   }
 
-  return { listmonkUrl, listmonkApiUser, listmonkApiToken, port, enabledToolSelectors, serverAuthToken };
+  return { listmonkUrl, listmonkApiUser, listmonkApiToken, port, enabledToolSelectors, serverAuthToken, transport };
 }
