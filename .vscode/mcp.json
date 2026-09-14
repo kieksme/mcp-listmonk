@@ -1,0 +1,13 @@
+{
+  "inputs": [
+    { "type": "promptString", "id": "listmonk_url", "description": "Listmonk MCP URL, e.g. http://localhost:3000/mcp" },
+    { "type": "promptString", "id": "listmonk_auth_token", "description": "MCP bearer token, if configured", "password": true }
+  ],
+  "servers": {
+    "listmonk": {
+      "type": "http",
+      "url": "${input:listmonk_url}",
+      "headers": { "Authorization": "Bearer ${input:listmonk_auth_token}" }
+    }
+  }
+}

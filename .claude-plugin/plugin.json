@@ -1,0 +1,26 @@
+{
+  "name": "listmonk-mcp",
+  "displayName": "Listmonk MCP",
+  "description": "Manage Listmonk subscribers, campaigns, lists, templates, and administration via MCP.",
+  "version": "1.0.0",
+  "author": { "name": "kieksme", "url": "https://github.com/kieksme" },
+  "homepage": "https://github.com/kieksme/mcp-listmonk#readme",
+  "repository": "https://github.com/kieksme/mcp-listmonk",
+  "license": "MIT",
+  "keywords": ["mcp", "listmonk", "newsletter", "email", "mailing-list"],
+  "userConfig": {
+    "server_url": {
+      "type": "string",
+      "title": "Listmonk MCP server URL",
+      "description": "Public HTTPS URL ending in /mcp",
+      "required": true
+    },
+    "server_auth_token": {
+      "type": "string",
+      "title": "MCP bearer token",
+      "description": "MCP_SERVER_AUTH_TOKEN configured on the hosted server",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

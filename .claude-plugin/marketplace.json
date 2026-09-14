@@ -1,0 +1,15 @@
+{
+  "name": "mcp-listmonk",
+  "owner": {
+    "name": "kieksme",
+    "url": "https://github.com/kieksme"
+  },
+  "description": "Listmonk newsletter MCP server",
+  "plugins": [
+    {
+      "name": "listmonk-mcp",
+      "source": "./",
+      "description": "Manage Listmonk subscribers, campaigns, lists, templates, and administration via MCP."
+    }
+  ]
+}

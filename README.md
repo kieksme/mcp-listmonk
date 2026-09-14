@@ -114,6 +114,13 @@ Start the server first (any of the methods above), so `http://localhost:3000/mcp
 
 ### Claude Code
 
+The repository also ships a Claude Code plugin marketplace entry:
+
+```text
+/plugin marketplace add kieksme/mcp-listmonk
+/plugin install listmonk-mcp@mcp-listmonk
+```
+
 Project-scoped, via `.mcp.json` in your repo root:
 
 ```json
@@ -168,6 +175,22 @@ In `opencode.json` (project or global config):
 ### ChatGPT
 
 ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable** URL — not `localhost`. Deploy the server (see Docker instructions above) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
+
+### Codex
+
+Register the same public endpoint in Codex:
+
+```bash
+codex mcp add listmonk --url https://<your-host>/mcp \
+  --bearer-token-env-var LISTMONK_MCP_AUTH_TOKEN
+```
+
+The repository also includes `.codex-plugin/plugin.json` and `.mcp.json` for plugin-based installation.
+
+### GitHub Copilot
+
+- VS Code: use the committed `.vscode/mcp.json` and enter the local or hosted `/mcp` URL when prompted.
+- Copilot Cloud Agent: use `.github/mcp.json` and configure `COPILOT_MCP_LISTMONK_URL` plus `COPILOT_MCP_LISTMONK_TOKEN` in the Copilot environment.
 
 ## Tool catalog (72 tools)
 
