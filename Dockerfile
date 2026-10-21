@@ -17,7 +17,6 @@ ARG PNPM_VERSION
 WORKDIR /app
 RUN npm install -g pnpm@${PNPM_VERSION}
 COPY package.json pnpm-lock.yaml ./
-COPY vendor ./vendor
 RUN pnpm install --frozen-lockfile
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
