@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { responseFormatField } from "./common.js";
 
 export const getSettingsSchema = {
@@ -7,7 +7,7 @@ export const getSettingsSchema = {
 
 export const updateSettingsSchema = {
   settings: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .describe(
       "Settings fields to update, using the exact dotted keys Listmonk uses internally " +
         "(e.g. 'app.site_name', 'smtp'). Fetch the current object with listmonk_get_settings first, " +
@@ -22,7 +22,7 @@ export const updateSettingsSchema = {
 export const testSmtpSettingsSchema = {
   email: z.string().email().describe("Recipient address that the SMTP test message will be sent to."),
   smtp_settings: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .describe(
       "The SMTP server block to test — fields like host, port, auth_protocol, username, password, " +
         "tls_type (see the 'smtp' array entries from listmonk_get_settings for the expected shape). " +

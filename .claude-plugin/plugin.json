@@ -18,7 +18,7 @@
     "server_auth_token": {
       "type": "string",
       "title": "MCP bearer token",
-      "description": "MCP_SERVER_AUTH_TOKEN configured on the hosted server",
+      "description": "MCP_AUTH_TOKEN configured on the hosted server (legacy MCP_SERVER_AUTH_TOKEN still accepted)",
       "sensitive": true,
       "required": true
     }

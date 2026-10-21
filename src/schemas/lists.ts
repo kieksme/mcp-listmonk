@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { idField, pageField, perPageField, responseFormatField } from "./common.js";
 
 const listType = z.enum(["public", "private"]);

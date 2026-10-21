@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const gcSubscribersSchema = {
   type: z.enum(["blocklisted", "orphan"]).describe("Which class of subscribers to permanently delete."),

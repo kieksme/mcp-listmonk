@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { DEFAULT_PAGE_SIZE } from "../constants.js";
 
 export const responseFormatField = z

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { idField, pageField, perPageField, responseFormatField } from "./common.js";
 
 const subscriberStatus = z.enum(["enabled", "disabled", "blocklisted"]);
@@ -28,7 +28,7 @@ export const createSubscriberSchema = {
   lists: z.array(z.number().int()).optional().describe("List ids to subscribe to."),
   list_uuids: z.array(z.string()).optional(),
   preconfirm_subscriptions: z.boolean().optional().describe("Mark list subscriptions as confirmed immediately."),
-  attribs: z.record(z.unknown()).optional().describe("Arbitrary custom attributes as a JSON object."),
+  attribs: z.record(z.string(), z.unknown()).optional().describe("Arbitrary custom attributes as a JSON object."),
   response_format: responseFormatField,
 } satisfies z.ZodRawShape;
 
@@ -45,7 +45,7 @@ export const updateSubscriberSchema = {
   lists: z.array(z.number().int()).optional(),
   list_uuids: z.array(z.string()).optional(),
   preconfirm_subscriptions: z.boolean().optional(),
-  attribs: z.record(z.unknown()).optional(),
+  attribs: z.record(z.string(), z.unknown()).optional(),
   response_format: responseFormatField,
 } satisfies z.ZodRawShape;
 

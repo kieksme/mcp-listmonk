@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { responseFormatField } from "./common.js";
 
 export const getHealthSchema = {} satisfies z.ZodRawShape;

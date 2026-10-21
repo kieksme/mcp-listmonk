@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { TOOL_CATEGORIES } from "../../src/constants.js";
 import { assertUniqueToolNames } from "../../src/registry/toolRegistry.js";
 import { ALL_TOOLS } from "../../src/tools/index.js";

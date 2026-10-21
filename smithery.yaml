@@ -1,0 +1,43 @@
+# Smithery project config — https://smithery.ai/docs/build/project-config
+#
+# Container runtime: Smithery builds the Dockerfile and connects over
+# Streamable HTTP. The kit honors PORT (Smithery sets it) and serves MCP at
+# /mcp by default.
+
+runtime: container
+
+build:
+  dockerfile: Dockerfile
+  dockerBuildPath: .
+
+startCommand:
+  type: http
+  configSchema:
+    type: object
+    properties:
+      mcpAuthToken:
+        type: string
+        title: MCP bearer token
+        description: Value for MCP_AUTH_TOKEN (clients send Authorization: Bearer …).
+      listmonkUrl:
+        type: string
+        title: Listmonk URL
+        description: Base URL of your Listmonk instance (LISTMONK_URL).
+      listmonkApiUser:
+        type: string
+        title: Listmonk API user
+        description: LISTMONK_API_USER.
+      listmonkApiToken:
+        type: string
+        title: Listmonk API token
+        description: LISTMONK_API_TOKEN.
+    required:
+      - mcpAuthToken
+      - listmonkUrl
+      - listmonkApiUser
+      - listmonkApiToken
+  exampleConfig:
+    mcpAuthToken: "replace-me"
+    listmonkUrl: "https://newsletter.example.com"
+    listmonkApiUser: "api-user"
+    listmonkApiToken: "replace-me"

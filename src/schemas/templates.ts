@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { idField, responseFormatField } from "./common.js";
 
 const templateType = z.enum(["campaign", "campaign_visual", "tx"]);
