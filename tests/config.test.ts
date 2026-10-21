@@ -1,25 +1,34 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadConfig, parseEnabledToolsEnv, resolveTransport } from "../src/config.js";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  applyCliTransportOverrides,
+  assertEnvCredentialsPresent,
+  parseEnabledToolsEnv,
+  resolveEnabledToolSelectorsForRequest,
+  resolveListmonkCredentialMode,
+  resolveListmonkCredentials,
+} from "../src/config.js";
 
-describe("resolveTransport", () => {
-  it("defaults to http when neither the flag nor the env var is set", () => {
-    expect(resolveTransport([], {})).toBe("http");
+describe("applyCliTransportOverrides", () => {
+  it("leaves MCP_TRANSPORT unset when neither flag is passed (kit defaults to stdio)", () => {
+    expect(applyCliTransportOverrides([], {})).toEqual({});
   });
 
-  it("returns stdio when --stdio is passed on the command line", () => {
-    expect(resolveTransport(["node", "index.js", "--stdio"], {})).toBe("stdio");
+  it("sets MCP_TRANSPORT=http when --http is passed", () => {
+    expect(applyCliTransportOverrides(["node", "index.js", "--http"], {})).toEqual({
+      MCP_TRANSPORT: "http",
+    });
   });
 
-  it("returns stdio when MCP_TRANSPORT=stdio, case-insensitively", () => {
-    expect(resolveTransport([], { MCP_TRANSPORT: "Stdio" })).toBe("stdio");
+  it("sets MCP_TRANSPORT=stdio when --stdio is passed", () => {
+    expect(applyCliTransportOverrides(["--stdio"], { MCP_TRANSPORT: "http" })).toEqual({
+      MCP_TRANSPORT: "stdio",
+    });
   });
 
-  it("ignores an unrecognized MCP_TRANSPORT value and falls back to http", () => {
-    expect(resolveTransport([], { MCP_TRANSPORT: "websocket" })).toBe("http");
-  });
-
-  it("the --stdio flag takes precedence over MCP_TRANSPORT=http", () => {
-    expect(resolveTransport(["--stdio"], { MCP_TRANSPORT: "http" })).toBe("stdio");
+  it("prefers --http over a prior env value when both could apply", () => {
+    expect(applyCliTransportOverrides(["--http"], { MCP_TRANSPORT: "stdio" })).toEqual({
+      MCP_TRANSPORT: "http",
+    });
   });
 });
 
@@ -57,16 +66,18 @@ describe("parseEnabledToolsEnv", () => {
   });
 });
 
-describe("loadConfig", () => {
-  const ENV_KEYS = ["LISTMONK_URL", "LISTMONK_API_USER", "LISTMONK_API_TOKEN", "PORT", "LISTMONK_ENABLED_TOOLS", "MCP_SERVER_AUTH_TOKEN"];
+describe("resolveListmonkCredentials", () => {
+  const ENV_KEYS = [
+    "LISTMONK_URL",
+    "LISTMONK_API_USER",
+    "LISTMONK_API_TOKEN",
+    "LISTMONK_CREDENTIAL_MODE",
+  ];
   let savedEnv: Record<string, string | undefined>;
 
   beforeEach(() => {
     savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
     for (const k of ENV_KEYS) delete process.env[k];
-    process.env.LISTMONK_URL = "https://listmonk.example.com";
-    process.env.LISTMONK_API_USER = "api-user";
-    process.env.LISTMONK_API_TOKEN = "api-token";
   });
 
   afterEach(() => {
@@ -74,79 +85,102 @@ describe("loadConfig", () => {
       if (savedEnv[k] === undefined) delete process.env[k];
       else process.env[k] = savedEnv[k];
     }
-    vi.restoreAllMocks();
   });
 
-  it("loads a full config from environment variables", () => {
-    process.env.PORT = "8080";
-    process.env.LISTMONK_ENABLED_TOOLS = "subscribers,lists";
-    process.env.MCP_SERVER_AUTH_TOKEN = "secret-token";
-    vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("defaults credential mode to env", () => {
+    expect(resolveListmonkCredentialMode({})).toBe("env");
+  });
 
-    const config = loadConfig();
-
-    expect(config).toEqual({
-      listmonkUrl: "https://listmonk.example.com",
-      listmonkApiUser: "api-user",
-      listmonkApiToken: "api-token",
-      port: 8080,
-      enabledToolSelectors: ["subscribers", "lists"],
-      serverAuthToken: "secret-token",
-      transport: "http",
+  it("reads credentials from env in env mode", () => {
+    const env = {
+      LISTMONK_URL: "https://listmonk.example.com",
+      LISTMONK_API_USER: "api-user",
+      LISTMONK_API_TOKEN: "api-token",
+    };
+    const creds = resolveListmonkCredentials(
+      { headers: new Headers(), auth: { mode: "bearer", scopes: [] } },
+      env
+    );
+    expect(creds).toEqual({
+      baseUrl: "https://listmonk.example.com",
+      apiUser: "api-user",
+      apiToken: "api-token",
     });
   });
 
-  it("defaults transport to http", () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    expect(loadConfig().transport).toBe("http");
+  it("reads credentials from headers in header mode", () => {
+    const headers = new Headers({
+      "x-listmonk-url": "https://from-header.example.com",
+      "x-listmonk-user": "header-user",
+      "x-listmonk-token": "header-token",
+    });
+    const creds = resolveListmonkCredentials(
+      { headers, auth: { mode: "bearer", scopes: [] } },
+      { LISTMONK_CREDENTIAL_MODE: "header" }
+    );
+    expect(creds).toEqual({
+      baseUrl: "https://from-header.example.com",
+      apiUser: "header-user",
+      apiToken: "header-token",
+    });
   });
 
-  it("does not warn about MCP_SERVER_AUTH_TOKEN when running over stdio", () => {
-    process.argv.push("--stdio");
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    try {
-      const config = loadConfig();
-      expect(config.transport).toBe("stdio");
-      expect(warnSpy).not.toHaveBeenCalled();
-    } finally {
-      process.argv.pop();
-    }
+  it("refuses header mode when auth is none", () => {
+    expect(() =>
+      resolveListmonkCredentials(
+        {
+          headers: new Headers({
+            "x-listmonk-url": "https://x",
+            "x-listmonk-user": "u",
+            "x-listmonk-token": "t",
+          }),
+          auth: { mode: "none", scopes: [] },
+        },
+        { LISTMONK_CREDENTIAL_MODE: "header" }
+      )
+    ).toThrow(/header/i);
   });
 
-  it("defaults port to 3000 when PORT is not set", () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    expect(loadConfig().port).toBe(3000);
+  it("assertEnvCredentialsPresent throws when env credentials are missing", () => {
+    expect(() => assertEnvCredentialsPresent({})).toThrow(/LISTMONK_URL/);
   });
 
-  it("treats an empty MCP_SERVER_AUTH_TOKEN as undefined and warns", () => {
-    process.env.MCP_SERVER_AUTH_TOKEN = "";
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+  it("assertEnvCredentialsPresent is a no-op in header mode", () => {
+    expect(() => assertEnvCredentialsPresent({ LISTMONK_CREDENTIAL_MODE: "header" })).not.toThrow();
+  });
+});
 
-    const config = loadConfig();
-
-    expect(config.serverAuthToken).toBeUndefined();
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("MCP_SERVER_AUTH_TOKEN is not set"));
+describe("resolveEnabledToolSelectorsForRequest", () => {
+  it("prefers the X-Listmonk-Enabled-Tools header over query and env", () => {
+    const selectors = resolveEnabledToolSelectorsForRequest(
+      {
+        headers: new Headers({ "x-listmonk-enabled-tools": "subscribers" }),
+        url: new URL("http://127.0.0.1:3000/mcp?tools=campaigns"),
+      },
+      { LISTMONK_ENABLED_TOOLS: "lists" }
+    );
+    expect(selectors).toEqual(["subscribers"]);
   });
 
-  it("does not warn when MCP_SERVER_AUTH_TOKEN is set", () => {
-    process.env.MCP_SERVER_AUTH_TOKEN = "secret-token";
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    loadConfig();
-
-    expect(warnSpy).not.toHaveBeenCalled();
+  it("falls back to ?tools= when the header is absent", () => {
+    const selectors = resolveEnabledToolSelectorsForRequest(
+      {
+        headers: new Headers(),
+        url: new URL("http://127.0.0.1:3000/mcp?tools=campaigns,lists"),
+      },
+      { LISTMONK_ENABLED_TOOLS: "subscribers" }
+    );
+    expect(selectors).toEqual(["campaigns", "lists"]);
   });
 
-  it("exits the process with an error when a required env var is missing", () => {
-    delete process.env.LISTMONK_URL;
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(((() => {
-      throw new Error("process.exit called");
-    }) as unknown) as typeof process.exit);
-
-    expect(() => loadConfig()).toThrow("process.exit called");
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("LISTMONK_URL"));
-    expect(exitSpy).toHaveBeenCalledWith(1);
+  it("falls back to LISTMONK_ENABLED_TOOLS when neither override is present", () => {
+    const selectors = resolveEnabledToolSelectorsForRequest(
+      {
+        headers: new Headers(),
+        url: new URL("http://127.0.0.1:3000/mcp"),
+      },
+      { LISTMONK_ENABLED_TOOLS: "admin" }
+    );
+    expect(selectors).toEqual(["admin"]);
   });
 });

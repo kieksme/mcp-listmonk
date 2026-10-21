@@ -1,23 +1,16 @@
-export type McpTransport = "stdio" | "http";
+import {
+  parseUpstreamCredentialMode,
+  resolveUpstreamCredential,
+  type AuthMode,
+  type RequestContext,
+  type UpstreamCredentialMode,
+} from "@kieksme/mcp-http-kit";
 
-export interface AppConfig {
-  listmonkUrl: string;
-  listmonkApiUser: string;
-  listmonkApiToken: string;
-  port: number;
-  enabledToolSelectors: string[];
-  serverAuthToken: string | undefined;
-  transport: McpTransport;
-}
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    console.error(`ERROR: ${name} environment variable is required`);
-    process.exit(1);
-  }
-  return value;
-}
+export type ListmonkCredentials = {
+  baseUrl: string;
+  apiUser: string;
+  apiToken: string;
+};
 
 /**
  * Parses LISTMONK_ENABLED_TOOLS (and the per-request override) as either a
@@ -44,35 +37,95 @@ export function parseEnabledToolsEnv(raw: string | undefined): string[] {
 }
 
 /**
- * Resolves which transport to run: `--stdio` on the command line takes
- * precedence, then MCP_TRANSPORT=stdio; anything else (including unset)
- * means the default Streamable HTTP transport.
+ * Resolve transport from CLI flags into env before `loadConfig`.
+ *
+ * Kit default is stdio. `--http` / `--stdio` override `MCP_TRANSPORT`.
+ * Prefer env (`MCP_TRANSPORT=http`) for containers; flags are for local CLIs.
  */
-export function resolveTransport(argv: string[], env: NodeJS.ProcessEnv): McpTransport {
-  if (argv.includes("--stdio")) return "stdio";
-  return env.MCP_TRANSPORT?.trim().toLowerCase() === "stdio" ? "stdio" : "http";
+export function applyCliTransportOverrides(
+  argv: string[] = process.argv,
+  env: NodeJS.ProcessEnv = process.env
+): NodeJS.ProcessEnv {
+  const next: NodeJS.ProcessEnv = { ...env };
+  if (argv.includes("--http")) {
+    next.MCP_TRANSPORT = "http";
+  } else if (argv.includes("--stdio")) {
+    next.MCP_TRANSPORT = "stdio";
+  }
+  return next;
 }
 
-export function loadConfig(): AppConfig {
-  const listmonkUrl = requireEnv("LISTMONK_URL");
-  const listmonkApiUser = requireEnv("LISTMONK_API_USER");
-  const listmonkApiToken = requireEnv("LISTMONK_API_TOKEN");
-  const port = Number.parseInt(process.env.PORT ?? "3000", 10);
-  const enabledToolSelectors = parseEnabledToolsEnv(process.env.LISTMONK_ENABLED_TOOLS);
-  const serverAuthToken = process.env.MCP_SERVER_AUTH_TOKEN || undefined;
-  const transport = resolveTransport(process.argv, process.env);
+export function resolveListmonkCredentialMode(
+  env: NodeJS.ProcessEnv = process.env
+): UpstreamCredentialMode {
+  return parseUpstreamCredentialMode(env.LISTMONK_CREDENTIAL_MODE, "env");
+}
 
-  // The auth-token gate only protects the HTTP transport's /mcp endpoint. In
-  // stdio mode there's no network listener — the client spawns and owns the
-  // process directly — so the warning would be noise (and misleading).
-  if (transport === "http" && !serverAuthToken) {
-    console.warn(
-      "WARNING: MCP_SERVER_AUTH_TOKEN is not set. The /mcp endpoint is unauthenticated at the " +
-        "application layer — anyone who can reach this port gets full Listmonk access in the " +
-        "scope of LISTMONK_API_USER. Set MCP_SERVER_AUTH_TOKEN, or ensure network-level access " +
-        "control (reverse proxy, VPN, firewall) is in place."
-    );
+/**
+ * Resolve Listmonk URL/user/token from env (default) or per-request headers.
+ * Never logs header values — callers must not dump `ctx.headers` either.
+ */
+export function resolveListmonkCredentials(
+  ctx: Pick<RequestContext, "headers" | "auth">,
+  env: NodeJS.ProcessEnv = process.env
+): ListmonkCredentials {
+  const mode = resolveListmonkCredentialMode(env);
+  const authMode: AuthMode = ctx.auth.mode;
+
+  const baseUrl = resolveUpstreamCredential(ctx.headers, {
+    mode,
+    envVar: "LISTMONK_URL",
+    headerName: "X-Listmonk-Url",
+    authMode,
+    env,
+  }).value;
+
+  const apiUser = resolveUpstreamCredential(ctx.headers, {
+    mode,
+    envVar: "LISTMONK_API_USER",
+    headerName: "X-Listmonk-User",
+    authMode,
+    env,
+  }).value;
+
+  const apiToken = resolveUpstreamCredential(ctx.headers, {
+    mode,
+    envVar: "LISTMONK_API_TOKEN",
+    headerName: "X-Listmonk-Token",
+    authMode,
+    env,
+  }).value;
+
+  return { baseUrl, apiUser, apiToken };
+}
+
+/**
+ * Per-request tool selectors: `X-Listmonk-Enabled-Tools` header, else `?tools=`,
+ * else process-level `LISTMONK_ENABLED_TOOLS`.
+ */
+export function resolveEnabledToolSelectorsForRequest(
+  ctx: Pick<RequestContext, "headers" | "url">,
+  env: NodeJS.ProcessEnv = process.env
+): string[] {
+  const headerOverride = ctx.headers.get("x-listmonk-enabled-tools");
+  if (typeof headerOverride === "string" && headerOverride.trim()) {
+    return parseEnabledToolsEnv(headerOverride);
   }
 
-  return { listmonkUrl, listmonkApiUser, listmonkApiToken, port, enabledToolSelectors, serverAuthToken, transport };
+  const queryOverride = ctx.url.searchParams.get("tools");
+  if (typeof queryOverride === "string" && queryOverride.trim()) {
+    return parseEnabledToolsEnv(queryOverride);
+  }
+
+  return parseEnabledToolsEnv(env.LISTMONK_ENABLED_TOOLS);
+}
+
+/** Validate required Listmonk env vars early when credential mode is env. */
+export function assertEnvCredentialsPresent(env: NodeJS.ProcessEnv = process.env): void {
+  if (resolveListmonkCredentialMode(env) !== "env") return;
+  for (const name of ["LISTMONK_URL", "LISTMONK_API_USER", "LISTMONK_API_TOKEN"] as const) {
+    if (!env[name]?.trim()) {
+      throw new Error(`${name} environment variable is required when LISTMONK_CREDENTIAL_MODE=env`);
+    }
+  }
 }

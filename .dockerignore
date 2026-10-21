@@ -2,3 +2,13 @@ node_modules
 dist
 *.log
 .git
+.github
+tests
+assets
+*.md
+!README.md
+!LICENSE
+.env
+.pnpm-store
+docker-compose.listmonk.yml
+config.toml

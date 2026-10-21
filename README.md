@@ -26,29 +26,33 @@ claude mcp add listmonk \
   -- npx -y @kieksme/listmonk-mcp --stdio
 ```
 
-**Remote:** start the server once, reachable over HTTP by any number of clients:
+**Remote:** start the server once over Streamable HTTP (auth required). Pass `--http` or set `MCP_TRANSPORT=http` — the default transport is now **stdio**:
 
 ```bash
 LISTMONK_URL=https://newsletter.example.com \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
-npx @kieksme/listmonk-mcp
+MCP_TRANSPORT=http \
+MCP_AUTH_TOKEN="$(openssl rand -hex 32)" \
+MCP_HTTP_HOST=127.0.0.1 \
+npx @kieksme/listmonk-mcp --http
 ```
 
 ```bash
-claude mcp add --transport http listmonk http://localhost:3000/mcp
+claude mcp add --transport http listmonk http://localhost:3000/mcp \
+  --header "Authorization: Bearer <MCP_AUTH_TOKEN>"
 ```
 
-See [Running the server](#running-the-server) for both modes in more detail, including Docker.
+See [Running the server](#running-the-server) for both modes in more detail, including Docker and Railway.
 
 ## Connecting your MCP client
 
 Each client below supports two setups — pick one:
 
-- **Local (stdio):** the client spawns `npx @kieksme/listmonk-mcp --stdio` itself as a subprocess and talks MCP over its stdin/stdout. No server to keep running, no port, no reachability concerns — this is generally the simpler default for a single local client.
-- **Remote (HTTP):** you run the server yourself (see [Running the server](#running-the-server)) and the client connects to its URL. Needed when multiple clients share one server instance, or the server runs somewhere other than your machine.
+- **Local (stdio):** the client spawns `npx @kieksme/listmonk-mcp` (stdio is the default) as a subprocess and talks MCP over its stdin/stdout. No server to keep running, no port, no reachability concerns — this is generally the simpler default for a single local client. `--stdio` still works if you want to be explicit.
+- **Remote (HTTP):** you run the server yourself with `MCP_TRANSPORT=http` / `--http` and a bearer `MCP_AUTH_TOKEN` (see [Running the server](#running-the-server)) and the client connects to its URL. Needed when multiple clients share one server instance, or the server runs somewhere other than your machine.
 
-**Using pnpm instead of npx for the local/stdio setup:** every local (stdio) example below uses `command: "npx"` with `args: ["-y", "@kieksme/listmonk-mcp", "--stdio"]`. If you prefer pnpm, swap in `command: "pnpm"` with `args: ["dlx", "@kieksme/listmonk-mcp", "--stdio"]` — **and drop the `-y`**. `-y` is npx's "skip the install confirmation prompt" flag; `pnpm dlx` has no such prompt to begin with, so it doesn't accept `-y` at all and exits immediately with `ERROR Unknown option: 'y'` (surfacing to the client as a generic "Connection closed", since the process dies before it ever speaks MCP). The same swap applies to any CLI form below that starts with `npx -y` — replace it with `pnpm dlx` (no `-y`).
+**Using pnpm instead of npx for the local/stdio setup:** every local (stdio) example below uses `command: "npx"` with `args: ["-y", "@kieksme/listmonk-mcp"]`. If you prefer pnpm, swap in `command: "pnpm"` with `args: ["dlx", "@kieksme/listmonk-mcp"]` — **and drop the `-y`**. `-y` is npx's "skip the install confirmation prompt" flag; `pnpm dlx` has no such prompt to begin with, so it doesn't accept `-y` at all and exits immediately with `ERROR Unknown option: 'y'` (surfacing to the client as a generic "Connection closed", since the process dies before it ever speaks MCP). The same swap applies to any CLI form below that starts with `npx -y` — replace it with `pnpm dlx` (no `-y`).
 
 **Reachability note for the remote/HTTP setup:** a client only needs `http://localhost:3000` if it runs *on the same machine* as the server. Claude Code, Cursor, VS Code, OpenCode, and LM Studio are all local tools, so `localhost` works directly. Claude Desktop is a local app and can usually reach `localhost` too. **ChatGPT and Claude.ai (the web apps) run in the cloud and cannot reach your `localhost`** — to use this server with them you'd need to deploy it somewhere reachable from the internet (or tunnel it, e.g. with `ngrok http 3000`) and use that public URL instead. ChatGPT's connectors are HTTP-only, so it has no local/stdio option below.
 
@@ -109,7 +113,7 @@ Remote (HTTP), once the server is running (see [Running the server](#running-the
 claude mcp add --transport http listmonk http://localhost:3000/mcp
 ```
 
-If you set `MCP_SERVER_AUTH_TOKEN` on the server, add the header: `claude mcp add --transport http listmonk http://localhost:3000/mcp --header "Authorization: Bearer <token>"`.
+HTTP mode requires `MCP_AUTH_TOKEN` on the server — add the header: `claude mcp add --transport http listmonk http://localhost:3000/mcp --header "Authorization: Bearer <token>"`. (`MCP_SERVER_AUTH_TOKEN` is still accepted as a deprecated alias.)
 
 </details>
 
@@ -152,7 +156,7 @@ Remote (HTTP), once the server is running:
 }
 ```
 
-If you set `MCP_SERVER_AUTH_TOKEN` on the server, pass it as a header:
+Pass the server's `MCP_AUTH_TOKEN` as a bearer header:
 
 ```json
 {
@@ -160,7 +164,7 @@ If you set `MCP_SERVER_AUTH_TOKEN` on the server, pass it as a header:
     "listmonk": {
       "url": "http://localhost:3000/mcp",
       "headers": {
-        "Authorization": "Bearer <token>"
+        "Authorization": "Bearer <MCP_AUTH_TOKEN>"
       }
     }
   }
@@ -353,7 +357,7 @@ Remote (HTTP), once the server is running:
 <details>
 <summary>Show config</summary>
 
-ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable HTTP URL** — ChatGPT runs in the cloud and can't spawn a local stdio process, so the remote setup is the only option. Deploy the server (see [Docker](#docker)) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL. If you set `MCP_SERVER_AUTH_TOKEN`, ChatGPT's connector setup lets you supply a bearer token alongside the URL.
+ChatGPT's Connectors (Settings → Connectors → Create, available on paid plans that support MCP) only accept a **publicly reachable HTTP URL** — ChatGPT runs in the cloud and can't spawn a local stdio process, so the remote setup is the only option. Deploy the server (see [Docker](#docker) / [Railway](#railway)) to a host with a public URL, or tunnel your local instance (e.g. `ngrok http 3000`), then register `https://<your-host>/mcp` as the connector URL and supply `MCP_AUTH_TOKEN` as the bearer token during connector setup.
 
 </details>
 
@@ -387,77 +391,114 @@ The repository also includes `.codex-plugin/plugin.json` and `.mcp.json` for plu
 
 - Full API coverage: subscribers, campaigns, lists, templates, media, bounces, import, settings, maintenance, transactional messages, public subscription, logs, admin, and dashboard/misc endpoints.
 - **Selective tool loading** — enable only the categories/tools you actually need, so the LLM's context isn't flooded with all 72 tool definitions at once.
-- **Two transports, one package:** stdio for a client-spawned local process, stateless Streamable HTTP for a remote deployment (no session state, easy to scale horizontally behind a load balancer).
-- Optional bearer-token gate in front of `/mcp` (HTTP transport only — stdio has no network listener to gate).
+- **Two transports, one package:** stdio (default) for a client-spawned local process; stateless Streamable HTTP via `@kieksme/mcp-http-kit` for remote deployments (bearer or OAuth, Host/Origin protection, Railway-friendly `/health`).
+- **Required bearer auth in HTTP mode** (`MCP_AUTH_TOKEN`) — constant-time compare, rotation via comma-separated tokens. OAuth resource-server mode available via `MCP_AUTH_MODE=oauth`.
 
 ## Running the server
 
 ### Local (stdio)
 
-Normally you don't start this by hand — your MCP client spawns it per the config in [Connecting your MCP client](#connecting-your-mcp-client) above. To run it manually (e.g. to sanity-check it outside a client), pass `--stdio` or set `MCP_TRANSPORT=stdio`:
-
-```bash
-LISTMONK_URL=https://newsletter.example.com \
-LISTMONK_API_USER=my-api-user \
-LISTMONK_API_TOKEN=xxxxxxxx \
-npx @kieksme/listmonk-mcp --stdio
-```
-
-The process speaks MCP JSON-RPC on stdout and logs to stderr — it exits when its stdin closes (i.e. when the parent client disconnects). `LISTMONK_ENABLED_TOOLS` still selects which tools are registered, but there's no per-request override in this mode: one client process, one fixed tool set for its lifetime.
-
-### Remote (HTTP)
+Normally you don't start this by hand — your MCP client spawns it per the config in [Connecting your MCP client](#connecting-your-mcp-client) above. To run it manually (e.g. to sanity-check it outside a client), leave transport unset (stdio is the default) or pass `--stdio` / `MCP_TRANSPORT=stdio`:
 
 ```bash
 LISTMONK_URL=https://newsletter.example.com \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
 npx @kieksme/listmonk-mcp
-# or
-pnpm dlx @kieksme/listmonk-mcp
 ```
 
-The MCP endpoint is `POST http://localhost:3000/mcp` (streamable HTTP, stateless — no session negotiation needed).
+The process speaks MCP JSON-RPC on stdout and logs to stderr — it exits when its stdin closes (i.e. when the parent client disconnects). `LISTMONK_ENABLED_TOOLS` still selects which tools are registered, but there's no per-request override in this mode: one client process, one fixed tool set for its lifetime.
+
+### Remote (HTTP)
+
+**Breaking:** HTTP is no longer the default. Pass `--http` or set `MCP_TRANSPORT=http`, and set `MCP_AUTH_TOKEN` (required unless you intentionally use `MCP_AUTH_MODE=none` on localhost / with `MCP_AUTH_ALLOW_NONE=true`).
+
+```bash
+LISTMONK_URL=https://newsletter.example.com \
+LISTMONK_API_USER=my-api-user \
+LISTMONK_API_TOKEN=xxxxxxxx \
+MCP_TRANSPORT=http \
+MCP_AUTH_TOKEN="$(openssl rand -hex 32)" \
+MCP_HTTP_HOST=127.0.0.1 \
+npx @kieksme/listmonk-mcp --http
+```
+
+The MCP endpoint is `POST http://localhost:3000/mcp` (streamable HTTP, stateless). Health probes: `GET /health` (and legacy alias `GET /healthz`) — unauthenticated, Host-agnostic.
 
 ### Docker
 
-The published image (`ghcr.io/kieksme/mcp-listmonk:latest`) supports both transports — it's the same entrypoint as `npx`, so the flags above apply the same way.
-
-Remote (HTTP) — publish the port:
+The published image (`ghcr.io/kieksme/mcp-listmonk:latest`) defaults to HTTP (`MCP_TRANSPORT=http`, `MCP_HTTP_HOST=0.0.0.0`) for container deploys.
 
 ```bash
 docker run -p 3000:3000 \
   -e LISTMONK_URL=https://newsletter.example.com \
   -e LISTMONK_API_USER=my-api-user \
   -e LISTMONK_API_TOKEN=xxxxxxxx \
+  -e MCP_AUTH_TOKEN="$(openssl rand -hex 32)" \
+  -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
   -e LISTMONK_ENABLED_TOOLS='["subscribers","campaigns"]' \
   ghcr.io/kieksme/mcp-listmonk:latest
 ```
 
-Local (stdio) — keep stdin attached (`-i`) instead of publishing a port; this is what you'd put behind a client's `command`/`args` (e.g. `docker` as the command) if you'd rather run the container than have `npx` fetch the package:
+Local (stdio) — override transport and keep stdin attached (`-i`):
 
 ```bash
 docker run -i --rm \
+  -e MCP_TRANSPORT=stdio \
   -e LISTMONK_URL=https://newsletter.example.com \
   -e LISTMONK_API_USER=my-api-user \
   -e LISTMONK_API_TOKEN=xxxxxxxx \
-  ghcr.io/kieksme/mcp-listmonk:latest --stdio
+  ghcr.io/kieksme/mcp-listmonk:latest
 ```
+
+### Railway
+
+This repo ships `railway.json` (Dockerfile builder, healthcheck `/health`). Set at least:
+
+| Variable | Notes |
+|---|---|
+| `MCP_AUTH_TOKEN` | Bearer secret(s) for MCP clients |
+| `LISTMONK_URL` / `LISTMONK_API_USER` / `LISTMONK_API_TOKEN` | Upstream Listmonk |
+| `MCP_ALLOWED_HOSTS` | Your Railway hostname(s), e.g. `your-app.up.railway.app,localhost,127.0.0.1` |
+
+`PORT` is set by Railway; the kit reads it first. Image env already sets `MCP_TRANSPORT=http` and `MCP_HTTP_HOST=0.0.0.0`.
 
 ## Configuration
 
-Set these environment variables when starting the server:
+Shared MCP HTTP/auth knobs come from [`@kieksme/mcp-http-kit`](https://github.com/kieksme/mcp-http-kit). Listmonk-specific vars:
 
 | Variable | Required | Description |
 |---|---|---|
-| `LISTMONK_URL` | Yes | Base URL of your Listmonk instance, e.g. `https://newsletter.example.com` |
-| `LISTMONK_API_USER` | Yes | API user name (Listmonk Admin → Users) |
-| `LISTMONK_API_TOKEN` | Yes | API token for that user |
-| `MCP_TRANSPORT` | No | `stdio` or `http` (default). The `--stdio` CLI flag is equivalent and takes precedence over this variable. |
-| `PORT` | No | HTTP port to listen on (default `3000`). Ignored in stdio mode. |
+| `LISTMONK_URL` | Yes\* | Base URL of your Listmonk instance, e.g. `https://newsletter.example.com` |
+| `LISTMONK_API_USER` | Yes\* | API user name (Listmonk Admin → Users) |
+| `LISTMONK_API_TOKEN` | Yes\* | API token for that user |
+| `LISTMONK_CREDENTIAL_MODE` | No | `env` (default) or `header` — when `header`, clients send `X-Listmonk-Url` / `X-Listmonk-User` / `X-Listmonk-Token` per request (never logged). Refused when `MCP_AUTH_MODE=none`. |
 | `LISTMONK_ENABLED_TOOLS` | No | JSON array (or comma-separated list) of tool/category selectors — see below. Empty/unset = all 72 tools. |
-| `MCP_SERVER_AUTH_TOKEN` | No | If set, `/mcp` requires `Authorization: Bearer <token>`. If unset, `/mcp` is open at the application layer — put a reverse proxy/VPN/firewall in front of it instead. Ignored in stdio mode (there's no network listener to gate). |
+| `MCP_TRANSPORT` | No | `stdio` (default) or `http`. CLI: `--http` / `--stdio` override this. |
+| `PORT` | No | HTTP listen port (default `3000`; Railway sets this). Fallback: `MCP_HTTP_PORT`. |
+| `MCP_HTTP_HOST` | No | Bind address (default `127.0.0.1`; containers use `0.0.0.0`). |
+| `MCP_HTTP_PATH` | No | MCP path (default `/mcp`). |
+| `MCP_HEALTH_PATH` | No | Health path (default `/health`). `/healthz` is always kept as an alias. |
+| `MCP_AUTH_MODE` | No | `bearer` (default), `oauth`, or `none` (localhost / `MCP_AUTH_ALLOW_NONE` only). |
+| `MCP_AUTH_TOKEN` | Yes (HTTP + bearer) | Bearer secret(s); comma-separated for rotation. |
+| `MCP_ALLOWED_HOSTS` | Yes when binding beyond localhost | Comma-separated Host allowlist. |
+| `MCP_ALLOWED_ORIGINS` | No | Absolute Origin allowlist; otherwise Origin hostname must be in hosts. |
 
-**Security note:** `LISTMONK_API_USER`/`LISTMONK_API_TOKEN` authenticate this *server* to *Listmonk*, not MCP clients to this server. Without `MCP_SERVER_AUTH_TOKEN`, anyone who can reach the port gets full Listmonk access at whatever scope the configured API user has. Prefer creating a least-privilege API user in Listmonk scoped only to the categories you intend to enable.
+\*Required when `LISTMONK_CREDENTIAL_MODE=env` (default). In `header` mode they come from the request headers instead.
+
+**Deprecated aliases** (still work, warn once): `MCP_SERVER_AUTH_TOKEN`, `MCP_HTTP_AUTH_TOKEN`, `MCP_HTTP_ALLOWED_HOSTS`, `MCP_HTTP_ALLOWED_ORIGINS`, `MCP_HTTP_ENDPOINT`, `HEALTH_ENDPOINT`.
+
+**Security note:** `LISTMONK_*` credentials authenticate this *server* to *Listmonk*, not MCP clients to this server. In HTTP mode, clients must present `MCP_AUTH_TOKEN` (or a valid OAuth access token). Prefer a least-privilege Listmonk API user scoped only to the categories you enable.
+
+### Migration notes (from ≤1.3)
+
+| Before | After |
+|---|---|
+| Default transport `http` | Default transport `stdio`; use `MCP_TRANSPORT=http` or `--http` |
+| Auth optional (`MCP_SERVER_AUTH_TOKEN` warn-only) | Bearer required by default (`MCP_AUTH_TOKEN`); legacy name still works |
+| Health `GET /healthz` only | `GET /health` (+ `/healthz` alias) |
+| Hand-rolled Express HTTP | `@kieksme/mcp-http-kit` + MCP TypeScript SDK v2 |
+| Node 18+, npm Dockerfile as root | Node 22.14+, pnpm multi-stage non-root image |
 
 ### Selecting which tools are available
 

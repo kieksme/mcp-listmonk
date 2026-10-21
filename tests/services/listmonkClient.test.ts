@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { requestMock, createMock } = vi.hoisted(() => {
   const requestMock = vi.fn();
-  const createMock = vi.fn(() => ({ request: requestMock }));
+  const createMock = vi.fn((..._args: unknown[]) => ({ request: requestMock }));
   return { requestMock, createMock };
 });
 
@@ -38,16 +38,20 @@ describe("ListmonkClient", () => {
 
   it("serializes array query params as repeated bare keys, not bracket notation", () => {
     new ListmonkClient({ baseUrl: "https://listmonk.example.com", apiUser: "u", apiToken: "t" });
-    const { paramsSerializer } = createMock.mock.calls[0][0];
-    const serialize = (paramsSerializer as { serialize: (p: Record<string, unknown>) => string }).serialize;
+    const createArgs = createMock.mock.calls[0]?.[0] as unknown as {
+      paramsSerializer: { serialize: (p: Record<string, unknown>) => string };
+    };
+    const serialize = createArgs.paramsSerializer.serialize;
 
     expect(serialize({ id: [1, 2, 3], query: "test" })).toBe("id=1&id=2&id=3&query=test");
   });
 
   it("omits null/undefined values when serializing query params", () => {
     new ListmonkClient({ baseUrl: "https://listmonk.example.com", apiUser: "u", apiToken: "t" });
-    const { paramsSerializer } = createMock.mock.calls[0][0];
-    const serialize = (paramsSerializer as { serialize: (p: Record<string, unknown>) => string }).serialize;
+    const createArgs = createMock.mock.calls[0]?.[0] as unknown as {
+      paramsSerializer: { serialize: (p: Record<string, unknown>) => string };
+    };
+    const serialize = createArgs.paramsSerializer.serialize;
 
     expect(serialize({ page: 1, per_page: undefined, query: null })).toBe("page=1");
   });

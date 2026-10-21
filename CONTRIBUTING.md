@@ -7,7 +7,7 @@ Thanks for your interest in contributing to `@kieksme/listmonk-mcp`! This docume
 ```bash
 git clone https://github.com/kieksme/mcp-listmonk.git
 cd mcp-listmonk
-npm install   # or: pnpm install
+pnpm install   # Node 22.14+, packageManager pnpm@10.33.2
 ```
 
 ### Running a local Listmonk instance
@@ -84,91 +84,79 @@ Then create an API user scoped to what you're testing (Admin → Users → New �
 LISTMONK_URL=http://localhost:9000 \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
-npm run dev
+pnpm run dev
 ```
 
 Tear down with `docker compose -f docker-compose.listmonk.yml down` (add `-v` to also drop the Postgres volume and start from a clean schema next time).
 
 ### Running from source
 
-npm:
+Default transport is **stdio**. For HTTP locally:
 
 ```bash
-npm run build
+pnpm build
 LISTMONK_URL=https://newsletter.example.com \
 LISTMONK_API_USER=my-api-user \
 LISTMONK_API_TOKEN=xxxxxxxx \
-npm start
+MCP_TRANSPORT=http \
+MCP_AUTH_TOKEN=dev-token \
+MCP_HTTP_HOST=127.0.0.1 \
+pnpm start -- --http
 ```
 
-pnpm:
-
-```bash
-pnpm run build
-LISTMONK_URL=https://newsletter.example.com \
-LISTMONK_API_USER=my-api-user \
-LISTMONK_API_TOKEN=xxxxxxxx \
-pnpm start
-```
-
-For live reload while editing, use `npm run dev` (or `pnpm run dev`) instead — it runs `src/index.ts` directly via `tsx watch`, no build step needed. Append `-- --stdio` to any of the commands above to run the stdio transport instead of the default HTTP one (see [README.md's Configuration section](README.md#configuration) for what each transport needs).
+For live reload: `pnpm run dev` (`tsx watch`). Append `-- --http` for HTTP, or leave the default stdio. See [README.md Configuration](README.md#configuration).
 
 ### Connecting a local MCP client to your source build
 
-However you started it (`npm start`, `pnpm start`, or `npm run dev`), the server listens on `http://localhost:3000/mcp` by default (override with `PORT`). Point an MCP client at that same URL to exercise your local changes end-to-end — this is exactly [README.md's Claude Code section](README.md#claude-code), just aimed at your working copy instead of a published release.
+**stdio:** point the client at `node /absolute/path/to/dist/index.js` with `LISTMONK_*` in `env`.
 
-For Claude Code, drop a project-scoped `.mcp.json` in the repo root:
+**HTTP:** start with `--http` as above, then:
 
 ```json
 {
   "mcpServers": {
     "listmonk": {
       "type": "http",
-      "url": "http://localhost:3000/mcp"
+      "url": "http://localhost:3000/mcp",
+      "headers": { "Authorization": "Bearer dev-token" }
     }
   }
 }
 ```
 
-`.mcp.json` isn't tracked by this repo (see `.gitignore`), so it's safe to leave in place while developing. Restart the running server (`npm run dev` already picks up code changes automatically) whenever you change tool schemas or registration logic — Claude Code reconnects on its next request, no client-side restart needed. See [Selecting which tools are available](README.md#selecting-which-tools-are-available) if you want `.mcp.json` to only expose a subset of tools while you're working on one category.
+`.mcp.json` isn't tracked (see `.gitignore`). See [Selecting which tools are available](README.md#selecting-which-tools-are-available) for per-request filters.
 
 ### Docker (local build)
 
 ```bash
 docker build -t listmonk-mcp .
 
-# HTTP transport
 docker run -p 3000:3000 \
   -e LISTMONK_URL=https://newsletter.example.com \
   -e LISTMONK_API_USER=my-api-user \
   -e LISTMONK_API_TOKEN=xxxxxxxx \
+  -e MCP_AUTH_TOKEN=dev-token \
+  -e MCP_ALLOWED_HOSTS=localhost,127.0.0.1 \
   -e LISTMONK_ENABLED_TOOLS='["subscribers","campaigns"]' \
   listmonk-mcp
-
-# stdio transport
-docker run -i --rm \
-  -e LISTMONK_URL=https://newsletter.example.com \
-  -e LISTMONK_API_USER=my-api-user \
-  -e LISTMONK_API_TOKEN=xxxxxxxx \
-  listmonk-mcp --stdio
 ```
 
 ## Verifying your changes locally
 
 ```bash
-npm run list-tools   # prints the tool catalog and which tools LISTMONK_ENABLED_TOOLS would enable, no network access needed
-npx @modelcontextprotocol/inspector   # connect to http://localhost:3000/mcp (HTTP), or "npx tsx src/index.ts --stdio" as the launch command for the stdio transport
+pnpm list-tools   # tool catalog / LISTMONK_ENABLED_TOOLS preview
+npx @modelcontextprotocol/inspector   # HTTP: http://localhost:3000/mcp + bearer; or launch `pnpm exec tsx src/index.ts` for stdio
 ```
 
 ## Testing
 
 ```bash
-npm run build   # type-checks and compiles src/ to dist/
-npm test        # runs the Vitest suite once (tests/**/*.test.ts)
-npm run test:watch
+pnpm build
+pnpm test
+pnpm test:watch
 ```
 
-Tests live under `tests/`, mirroring the `src/` layout (`formatters/`, `registry/`, `services/`, `tools/`, plus `config.test.ts` and `errors.test.ts`). Axios/HTTP calls are mocked — no real Listmonk instance is required to run the suite.
+Tests live under `tests/` (including `tests/http/kit-contract.test.ts` for the shared kit HTTP contract). Axios/HTTP upstream calls are mocked — no real Listmonk instance is required.
 
 ## Commit messages
 

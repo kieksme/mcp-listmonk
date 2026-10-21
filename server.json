@@ -1,0 +1,107 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.kieksme/listmonk-mcp",
+  "title": "Listmonk MCP",
+  "description": "MCP server for the Listmonk newsletter/mailing-list API — subscribers, campaigns, lists, templates, and admin tools.",
+  "repository": {
+    "url": "https://github.com/kieksme/mcp-listmonk",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/kieksme/mcp-listmonk#readme",
+  "version": "1.3.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@kieksme/listmonk-mcp",
+      "version": "1.3.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "LISTMONK_URL",
+          "description": "Base URL of your Listmonk instance (e.g. https://newsletter.example.com).",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "LISTMONK_API_USER",
+          "description": "Listmonk API user name (Admin → Users).",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "LISTMONK_API_TOKEN",
+          "description": "Listmonk API token for that user.",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    },
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/kieksme/mcp-listmonk",
+      "version": "1.3.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:3000/mcp"
+      },
+      "environmentVariables": [
+        {
+          "name": "MCP_AUTH_TOKEN",
+          "description": "Bearer token MCP clients must send (Authorization: Bearer …). Comma-separated list allowed for rotation.",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "LISTMONK_URL",
+          "description": "Base URL of your Listmonk instance.",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "LISTMONK_API_USER",
+          "description": "Listmonk API user name.",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "LISTMONK_API_TOKEN",
+          "description": "Listmonk API token.",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "MCP_ALLOWED_HOSTS",
+          "description": "Comma-separated Host allowlist (required when binding beyond localhost).",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://REPLACE_WITH_PUBLIC_HOST/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer token (MCP_AUTH_TOKEN). Format: Bearer <token>",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

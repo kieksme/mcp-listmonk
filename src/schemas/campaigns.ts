@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import { idField, pageField, perPageField, responseFormatField } from "./common.js";
 
 const contentType = z.enum(["richtext", "html", "markdown", "plain", "visual"]);
@@ -98,7 +98,7 @@ export const updateCampaignArchiveSchema = {
   id: idField,
   archive: z.boolean().describe("Whether this campaign is published to the public archive."),
   archive_template_id: z.number().int().optional(),
-  archive_meta: z.record(z.unknown()).optional(),
+  archive_meta: z.record(z.string(), z.unknown()).optional(),
   archive_slug: z.string().optional().describe("URL slug for the archived campaign page."),
 } satisfies z.ZodRawShape;
 

@@ -1,6 +1,5 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import type { z } from "zod";
+import type { CallToolResult, McpServer, ToolAnnotations } from "@modelcontextprotocol/server";
+import * as z from "zod/v4";
 import type { ToolCategory } from "../constants.js";
 import type { ListmonkClient } from "../services/listmonkClient.js";
 
@@ -44,7 +43,8 @@ export function registerFilteredTools(
       {
         title: tool.title,
         description: tool.description,
-        inputSchema: tool.inputSchema,
+        // SDK v2 accepts a Zod object (Standard Schema) or a raw shape; pass the object form.
+        inputSchema: z.object(tool.inputSchema),
         annotations: tool.annotations,
       },
       async (args) => tool.handler(client, args as z.infer<z.ZodObject<z.ZodRawShape>>)
