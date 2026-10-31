@@ -524,6 +524,33 @@ Leave it unset (or `[]`) to expose all 72 tools.
 
 Since the query string is just part of the URL, this is the easiest way to give one particular client (e.g. one entry in an `opencode.json`, `.mcp.json`, or `.cursor/mcp.json`) a reduced tool set while other clients keep hitting the same server with the full (or a different) set — just set that client's `url` to `http://localhost:3000/mcp?tools=subscribers,campaigns` instead of adding server-wide env vars or standing up a second instance. Clients that support custom headers can use `X-Listmonk-Enabled-Tools` instead, which keeps the URL itself clean.
 
+### Tracing (OpenTelemetry, opt-in)
+
+Off by default. Set an OTLP endpoint and one tool call becomes one trace: MCP client → this server → Listmonk REST API. The trace context comes from `params._meta` (`traceparent` / `tracestate`), so it also works over stdio. It is trusted only with `MCP_AUTH_MODE` `bearer` / `oauth`, or on stdio.
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
+OTEL_SERVICE_NAME=listmonk-mcp \
+MCP_TRANSPORT=http MCP_AUTH_TOKEN=… LISTMONK_URL=… LISTMONK_API_USER=… LISTMONK_API_TOKEN=… \
+pnpm start
+```
+
+Try it locally with Jaeger (UI on <http://localhost:16686>):
+
+```bash
+docker run --rm -p 16686:16686 -p 4318:4318 jaegertracing/all-in-one
+```
+
+| Variable | Notes |
+|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Switches tracing on (traces are posted to `<endpoint>/v1/traces`). Use `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` for a full URL. |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Auth headers for the collector (never logged) |
+| `OTEL_SERVICE_NAME` | Service name, default `listmonk-mcp` |
+| `OTEL_SDK_DISABLED=true` | Kill switch |
+| `MCP_OTEL_RECORD_PAYLOADS=true` | Also record tool arguments, results and full URLs. **Off by default** because they can contain subscriber data (emails, SQL filters in query strings). |
+
+Privacy by default: no tool arguments or results, no `Authorization` header, query strings and credentials removed from URL attributes (the subscriber `query` filter is a query string), only `traceparent` / `tracestate` sent to Listmonk (never baggage), and only calls made inside a tool call are traced. Details: [`@kieksme/mcp-http-kit` README](https://github.com/kieksme/mcp-http-kit#tracing-opentelemetry-opt-in).
+
 ## Tool catalog (72 tools)
 
 <details>
